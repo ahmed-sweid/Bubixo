@@ -1,8 +1,10 @@
-import '../../core/models/profile_models.dart';
+part of 'profile_cubit.dart';
 
-/// Profil sekmesinin cubit'e hazır durum modeli.
-sealed class ProfileState {
+sealed class ProfileState extends Equatable {
   const ProfileState();
+
+  @override
+  List<Object?> get props => const <Object?>[];
 }
 
 final class ProfileLoading extends ProfileState {
@@ -31,4 +33,7 @@ final class ProfileReady extends ProfileState {
 
   /// Bugün tamamlanan etkinlik sayısı — günlük hedef halkasını besler.
   final int doneToday;
+
+  @override
+  List<Object?> get props => <Object?>[profile, settings, stats, doneToday];
 }

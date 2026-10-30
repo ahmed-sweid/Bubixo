@@ -30,7 +30,7 @@ import 'package:en_bubixo/features/practice/practice_screen.dart';
 import 'package:en_bubixo/features/practice/cubit/practice_cubit.dart';
 import 'package:en_bubixo/features/practice/cubit/practice_detail_cubit.dart';
 import 'package:en_bubixo/features/profile/profile_screen.dart';
-import 'package:en_bubixo/features/profile/profile_state.dart';
+import 'package:en_bubixo/features/profile/cubit/profile_cubit.dart';
 import 'package:en_bubixo/features/shell/home_shell.dart';
 import 'package:en_bubixo/features/shell/widgets/nav_tab.dart';
 import 'package:en_bubixo/features/splash/splash_screen.dart';
@@ -569,14 +569,20 @@ void main() {
     testWidgets('hata durumunda hata görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const ProfileScreen(state: ProfileError()));
+      await pumpScreen(
+        tester,
+        ProfileScreen(cubit: ProfileCubit(initialState: const ProfileError())),
+      );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const ProfileScreen(state: ProfileEmpty()));
+      await pumpScreen(
+        tester,
+        ProfileScreen(cubit: ProfileCubit(initialState: const ProfileEmpty())),
+      );
       expect(find.text(StateContent.profileEmptyTitle), findsOneWidget);
     });
 
@@ -585,12 +591,14 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const ProfileScreen(
-          state: ProfileReady(
-            profile: _profile,
-            settings: _settings,
-            stats: _stats,
-            doneToday: 1,
+        ProfileScreen(
+          cubit: ProfileCubit(
+            initialState: const ProfileReady(
+              profile: _profile,
+              settings: _settings,
+              stats: _stats,
+              doneToday: 1,
+            ),
           ),
         ),
       );
