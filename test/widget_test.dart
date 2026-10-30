@@ -13,6 +13,7 @@ import 'package:en_bubixo/core/constants/splash_content.dart';
 import 'package:en_bubixo/core/constants/state_content.dart';
 import 'package:en_bubixo/core/constants/words_content.dart';
 import 'package:en_bubixo/core/design_system.dart';
+import 'package:en_bubixo/core/models/level_test_models.dart';
 import 'package:en_bubixo/core/models/lesson_models.dart';
 import 'package:en_bubixo/core/models/practice_models.dart';
 import 'package:en_bubixo/core/models/profile_models.dart';
@@ -20,8 +21,8 @@ import 'package:en_bubixo/core/models/story_models.dart';
 import 'package:en_bubixo/core/models/word_models.dart';
 import 'package:en_bubixo/features/auth/login_screen.dart';
 import 'package:en_bubixo/features/common/states/app_skeletons.dart';
+import 'package:en_bubixo/features/level/cubit/level_test_cubit.dart';
 import 'package:en_bubixo/features/level/level_test_screen.dart';
-import 'package:en_bubixo/features/level/level_test_state.dart';
 import 'package:en_bubixo/features/lessons/lessons_screen.dart';
 import 'package:en_bubixo/features/lessons/cubit/lessons_cubit.dart';
 import 'package:en_bubixo/features/onboarding/onboarding_screen.dart';
@@ -628,14 +629,24 @@ void main() {
     testWidgets('hata durumunda hata görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const LevelTestScreen(state: LevelTestError()));
+      await pumpScreen(
+        tester,
+        LevelTestScreen(
+          cubit: LevelTestCubit(initialState: const LevelTestError()),
+        ),
+      );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const LevelTestScreen(state: LevelTestEmpty()));
+      await pumpScreen(
+        tester,
+        LevelTestScreen(
+          cubit: LevelTestCubit(initialState: const LevelTestEmpty()),
+        ),
+      );
       expect(find.text(StateContent.levelTestEmptyTitle), findsOneWidget);
     });
 
@@ -646,7 +657,9 @@ void main() {
       await pumpScreen(
         tester,
         LevelTestScreen(
-          state: const LevelTestReady(questions: _testQuestions),
+          cubit: LevelTestCubit(
+            initialState: const LevelTestReady(questions: _testQuestions),
+          ),
           onCompleted: (int levelIndex) => completedLevel = levelIndex,
         ),
       );
