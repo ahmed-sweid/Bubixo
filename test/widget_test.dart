@@ -34,7 +34,7 @@ import 'package:en_bubixo/features/shell/home_shell.dart';
 import 'package:en_bubixo/features/shell/widgets/nav_tab.dart';
 import 'package:en_bubixo/features/splash/splash_screen.dart';
 import 'package:en_bubixo/features/stories/stories_screen.dart';
-import 'package:en_bubixo/features/stories/stories_state.dart';
+import 'package:en_bubixo/features/stories/cubit/stories_cubit.dart';
 import 'package:en_bubixo/features/words/words_screen.dart';
 import 'package:en_bubixo/features/words/words_state.dart';
 
@@ -337,14 +337,20 @@ void main() {
     testWidgets('hata durumunda hata görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const StoriesScreen(state: StoriesError()));
+      await pumpScreen(
+        tester,
+        StoriesScreen(cubit: StoriesCubit(initialState: const StoriesError())),
+      );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const StoriesScreen(state: StoriesEmpty()));
+      await pumpScreen(
+        tester,
+        StoriesScreen(cubit: StoriesCubit(initialState: const StoriesEmpty())),
+      );
       expect(find.text(StateContent.storiesEmptyTitle), findsOneWidget);
     });
 
@@ -353,10 +359,12 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const StoriesScreen(
-          state: StoriesReady(
-            stories: <Story>[_story],
-            categories: <String>['Klasik'],
+        StoriesScreen(
+          cubit: StoriesCubit(
+            initialState: const StoriesReady(
+              stories: <Story>[_story],
+              categories: <String>['Klasik'],
+            ),
           ),
         ),
       );

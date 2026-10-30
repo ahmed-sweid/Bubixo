@@ -1,8 +1,10 @@
-import '../../core/models/story_models.dart';
+part of 'stories_cubit.dart';
 
-/// Hikâyeler sekmesinin Cubit'e hazır durum kümesi.
-sealed class StoriesState {
+sealed class StoriesState extends Equatable {
   const StoriesState();
+
+  @override
+  List<Object?> get props => const <Object?>[];
 }
 
 final class StoriesLoading extends StoriesState {
@@ -27,4 +29,7 @@ final class StoriesReady extends StoriesState {
   final List<Story> stories;
   final List<String> categories;
   final Story? continueStory;
+
+  @override
+  List<Object?> get props => <Object?>[stories, categories, continueStory];
 }
