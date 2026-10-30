@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/nav_content.dart';
 import '../../../core/design_system.dart';
-import '../practice_state.dart';
+import '../../../core/models/practice_models.dart';
 import 'practice_type_card.dart';
 
 /// Pratikler sekmesinin hazır durum görünümü: başlık ve tür kartları.

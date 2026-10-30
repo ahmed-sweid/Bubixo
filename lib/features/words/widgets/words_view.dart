@@ -5,7 +5,6 @@ import '../../../core/constants/nav_content.dart';
 import '../../../core/constants/words_content.dart';
 import '../../../core/design_system.dart';
 import '../../../core/models/word_models.dart';
-import '../words_state.dart';
 import 'suggested_words.dart';
 import 'translate_card.dart';
 import 'words_stats_card.dart';

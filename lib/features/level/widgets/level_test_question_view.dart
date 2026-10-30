@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/level_test_content.dart';
 import '../../../core/design_system.dart';
 import '../../common/widgets/option_card.dart';
-import '../level_test_state.dart';
+import '../../../core/models/level_test_models.dart';
 
 /// Tek soruluk test görünümü: ilerleme, soru, seçenekler ve DEVAM butonu.
 class LevelTestQuestionView extends StatelessWidget {

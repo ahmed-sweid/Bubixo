@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/nav_content.dart';
 import '../../../core/design_system.dart';
 import '../../../core/models/lesson_models.dart';
-import '../lessons_state.dart';
 import 'lessons_level_card.dart';
 import 'lessons_tabs_header_delegate.dart';
 import 'track_tabs.dart';

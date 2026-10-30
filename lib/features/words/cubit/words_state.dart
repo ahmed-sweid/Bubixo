@@ -1,8 +1,10 @@
-import '../../core/models/word_models.dart';
+part of 'words_cubit.dart';
 
-/// Kelimeler sekmesinin Cubit'e hazır durum kümesi.
-sealed class WordsState {
+sealed class WordsState extends Equatable {
   const WordsState();
+
+  @override
+  List<Object?> get props => const <Object?>[];
 }
 
 final class WordsLoading extends WordsState {
@@ -29,12 +31,12 @@ final class WordsReady extends WordsState {
   final List<PoolWord> suggestedWords;
   final WordTranslation? translation;
   final bool enToTr;
-}
 
-/// Hızlı çeviri kartının gösterdiği son sonuç.
-class WordTranslation {
-  const WordTranslation({required this.term, this.translation});
-
-  final String term;
-  final String? translation;
+  @override
+  List<Object?> get props => <Object?>[
+    words,
+    suggestedWords,
+    translation,
+    enToTr,
+  ];
 }

@@ -4,7 +4,6 @@ import 'package:iconsax/iconsax.dart';
 import '../../../core/constants/practice_content.dart';
 import '../../../core/design_system.dart';
 import '../../../core/models/practice_models.dart';
-import '../practice_state.dart';
 
 /// Pratikler listesindeki tür kartı: ikon, başlık, açıklama ve ilerleme.
 class PracticeTypeCard extends StatelessWidget {

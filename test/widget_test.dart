@@ -13,6 +13,7 @@ import 'package:en_bubixo/core/constants/splash_content.dart';
 import 'package:en_bubixo/core/constants/state_content.dart';
 import 'package:en_bubixo/core/constants/words_content.dart';
 import 'package:en_bubixo/core/design_system.dart';
+import 'package:en_bubixo/core/models/level_test_models.dart';
 import 'package:en_bubixo/core/models/lesson_models.dart';
 import 'package:en_bubixo/core/models/practice_models.dart';
 import 'package:en_bubixo/core/models/profile_models.dart';
@@ -20,23 +21,24 @@ import 'package:en_bubixo/core/models/story_models.dart';
 import 'package:en_bubixo/core/models/word_models.dart';
 import 'package:en_bubixo/features/auth/login_screen.dart';
 import 'package:en_bubixo/features/common/states/app_skeletons.dart';
+import 'package:en_bubixo/features/level/cubit/level_test_cubit.dart';
 import 'package:en_bubixo/features/level/level_test_screen.dart';
-import 'package:en_bubixo/features/level/level_test_state.dart';
 import 'package:en_bubixo/features/lessons/lessons_screen.dart';
-import 'package:en_bubixo/features/lessons/lessons_state.dart';
+import 'package:en_bubixo/features/lessons/cubit/lessons_cubit.dart';
 import 'package:en_bubixo/features/onboarding/onboarding_screen.dart';
 import 'package:en_bubixo/features/practice/practice_detail_screen.dart';
 import 'package:en_bubixo/features/practice/practice_screen.dart';
-import 'package:en_bubixo/features/practice/practice_state.dart';
+import 'package:en_bubixo/features/practice/cubit/practice_cubit.dart';
+import 'package:en_bubixo/features/practice/cubit/practice_detail_cubit.dart';
 import 'package:en_bubixo/features/profile/profile_screen.dart';
-import 'package:en_bubixo/features/profile/profile_state.dart';
+import 'package:en_bubixo/features/profile/cubit/profile_cubit.dart';
 import 'package:en_bubixo/features/shell/home_shell.dart';
 import 'package:en_bubixo/features/shell/widgets/nav_tab.dart';
 import 'package:en_bubixo/features/splash/splash_screen.dart';
 import 'package:en_bubixo/features/stories/stories_screen.dart';
-import 'package:en_bubixo/features/stories/stories_state.dart';
+import 'package:en_bubixo/features/stories/cubit/stories_cubit.dart';
 import 'package:en_bubixo/features/words/words_screen.dart';
-import 'package:en_bubixo/features/words/words_state.dart';
+import 'package:en_bubixo/features/words/cubit/words_cubit.dart';
 
 // --- Sabit test verileri ----------------------------------------------------
 
@@ -266,7 +268,10 @@ void main() {
       int retries = 0;
       await pumpScreen(
         tester,
-        LessonsScreen(state: const LessonsError(), onRetry: () => retries++),
+        LessonsScreen(
+          cubit: LessonsCubit(initialState: const LessonsError()),
+          onRetry: () => retries++,
+        ),
       );
 
       expect(find.text(StateContent.errorTitle), findsOneWidget);
@@ -281,7 +286,10 @@ void main() {
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const LessonsScreen(state: LessonsEmpty()));
+      await pumpScreen(
+        tester,
+        LessonsScreen(cubit: LessonsCubit(initialState: const LessonsEmpty())),
+      );
       expect(find.text(StateContent.lessonsEmptyTitle), findsOneWidget);
     });
 
@@ -290,7 +298,11 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const LessonsScreen(state: LessonsReady(levels: <LessonLevel>[_level])),
+        LessonsScreen(
+          cubit: LessonsCubit(
+            initialState: const LessonsReady(levels: <LessonLevel>[_level]),
+          ),
+        ),
       );
 
       expect(find.text(NavContent.lessonsTitle), findsOneWidget);
@@ -327,14 +339,20 @@ void main() {
     testWidgets('hata durumunda hata görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const StoriesScreen(state: StoriesError()));
+      await pumpScreen(
+        tester,
+        StoriesScreen(cubit: StoriesCubit(initialState: const StoriesError())),
+      );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const StoriesScreen(state: StoriesEmpty()));
+      await pumpScreen(
+        tester,
+        StoriesScreen(cubit: StoriesCubit(initialState: const StoriesEmpty())),
+      );
       expect(find.text(StateContent.storiesEmptyTitle), findsOneWidget);
     });
 
@@ -343,10 +361,12 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const StoriesScreen(
-          state: StoriesReady(
-            stories: <Story>[_story],
-            categories: <String>['Klasik'],
+        StoriesScreen(
+          cubit: StoriesCubit(
+            initialState: const StoriesReady(
+              stories: <Story>[_story],
+              categories: <String>['Klasik'],
+            ),
           ),
         ),
       );
@@ -368,14 +388,20 @@ void main() {
     testWidgets('hata durumunda hata görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const WordsScreen(state: WordsError()));
+      await pumpScreen(
+        tester,
+        WordsScreen(cubit: WordsCubit(initialState: const WordsError())),
+      );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const WordsScreen(state: WordsEmpty()));
+      await pumpScreen(
+        tester,
+        WordsScreen(cubit: WordsCubit(initialState: const WordsEmpty())),
+      );
       expect(find.text(StateContent.wordsEmptyTitle), findsOneWidget);
     });
 
@@ -384,7 +410,11 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const WordsScreen(state: WordsReady(words: <Word>[_word])),
+        WordsScreen(
+          cubit: WordsCubit(
+            initialState: const WordsReady(words: <Word>[_word]),
+          ),
+        ),
       );
 
       expect(find.text(NavContent.wordsTitle), findsOneWidget);
@@ -406,14 +436,24 @@ void main() {
     testWidgets('hata durumunda hata görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const PracticeScreen(state: PracticeError()));
+      await pumpScreen(
+        tester,
+        PracticeScreen(
+          cubit: PracticeCubit(initialState: const PracticeError()),
+        ),
+      );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const PracticeScreen(state: PracticeEmpty()));
+      await pumpScreen(
+        tester,
+        PracticeScreen(
+          cubit: PracticeCubit(initialState: const PracticeEmpty()),
+        ),
+      );
       expect(find.text(StateContent.practiceEmptyTitle), findsOneWidget);
     });
 
@@ -422,9 +462,11 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const PracticeScreen(
-          state: PracticeReady(
-            types: <PracticeTypeProgress>[_practiceProgress],
+        PracticeScreen(
+          cubit: PracticeCubit(
+            initialState: const PracticeReady(
+              types: <PracticeTypeProgress>[_practiceProgress],
+            ),
           ),
         ),
       );
@@ -461,9 +503,9 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const PracticeDetailScreen(
+        PracticeDetailScreen(
           type: PracticeType.sentenceOrder,
-          state: PracticeDetailError(),
+          cubit: PracticeDetailCubit(initialState: const PracticeDetailError()),
         ),
       );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
@@ -474,9 +516,9 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const PracticeDetailScreen(
+        PracticeDetailScreen(
           type: PracticeType.sentenceOrder,
-          state: PracticeDetailEmpty(),
+          cubit: PracticeDetailCubit(initialState: const PracticeDetailEmpty()),
         ),
       );
       expect(find.text(StateContent.practiceEmptyTitle), findsOneWidget);
@@ -487,9 +529,13 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const PracticeDetailScreen(
+        PracticeDetailScreen(
           type: PracticeType.sentenceOrder,
-          state: PracticeDetailReady(progress: _practiceProgress),
+          cubit: PracticeDetailCubit(
+            initialState: const PracticeDetailReady(
+              progress: _practiceProgress,
+            ),
+          ),
         ),
       );
 
@@ -524,14 +570,20 @@ void main() {
     testWidgets('hata durumunda hata görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const ProfileScreen(state: ProfileError()));
+      await pumpScreen(
+        tester,
+        ProfileScreen(cubit: ProfileCubit(initialState: const ProfileError())),
+      );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const ProfileScreen(state: ProfileEmpty()));
+      await pumpScreen(
+        tester,
+        ProfileScreen(cubit: ProfileCubit(initialState: const ProfileEmpty())),
+      );
       expect(find.text(StateContent.profileEmptyTitle), findsOneWidget);
     });
 
@@ -540,12 +592,14 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const ProfileScreen(
-          state: ProfileReady(
-            profile: _profile,
-            settings: _settings,
-            stats: _stats,
-            doneToday: 1,
+        ProfileScreen(
+          cubit: ProfileCubit(
+            initialState: const ProfileReady(
+              profile: _profile,
+              settings: _settings,
+              stats: _stats,
+              doneToday: 1,
+            ),
           ),
         ),
       );
@@ -575,14 +629,24 @@ void main() {
     testWidgets('hata durumunda hata görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const LevelTestScreen(state: LevelTestError()));
+      await pumpScreen(
+        tester,
+        LevelTestScreen(
+          cubit: LevelTestCubit(initialState: const LevelTestError()),
+        ),
+      );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const LevelTestScreen(state: LevelTestEmpty()));
+      await pumpScreen(
+        tester,
+        LevelTestScreen(
+          cubit: LevelTestCubit(initialState: const LevelTestEmpty()),
+        ),
+      );
       expect(find.text(StateContent.levelTestEmptyTitle), findsOneWidget);
     });
 
@@ -593,7 +657,9 @@ void main() {
       await pumpScreen(
         tester,
         LevelTestScreen(
-          state: const LevelTestReady(questions: _testQuestions),
+          cubit: LevelTestCubit(
+            initialState: const LevelTestReady(questions: _testQuestions),
+          ),
           onCompleted: (int levelIndex) => completedLevel = levelIndex,
         ),
       );

@@ -44,6 +44,38 @@ class PracticeItem {
   final bool completed;
 }
 
+/// Tek bir pratik türünün toplam ilerlemesi ve seviye kırılımı.
+@immutable
+class PracticeTypeProgress {
+  const PracticeTypeProgress({
+    required this.type,
+    required this.completedCount,
+    required this.totalCount,
+    required this.levels,
+  });
+
+  final PracticeType type;
+  final int completedCount;
+  final int totalCount;
+  final List<PracticeLevelProgress> levels;
+
+  double get progress => totalCount == 0 ? 0 : completedCount / totalCount;
+}
+
+/// Bir pratik türünün tek seviyesindeki içerikler ve ilerlemesi.
+@immutable
+class PracticeLevelProgress {
+  const PracticeLevelProgress({
+    required this.levelIndex,
+    required this.items,
+    required this.progress,
+  });
+
+  final int levelIndex;
+  final List<PracticeItem> items;
+  final double progress;
+}
+
 /// Cümle sıralama sorusu: [tokens] karışık, [answer] doğru sıra, [hint]
 /// cümlenin Türkçe karşılığı.
 @immutable
