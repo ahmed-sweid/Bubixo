@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/practice_content.dart';
 import '../../../core/design_system.dart';
 import '../../../core/models/practice_models.dart';
-import '../practice_state.dart';
 import 'practice_level_card.dart';
 
 /// Pratik detayının hazır durum görünümü: açıklama, toplam ve seviye

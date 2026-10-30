@@ -5,7 +5,6 @@ import '../../../core/constants/level_content.dart';
 import '../../../core/constants/practice_content.dart';
 import '../../../core/design_system.dart';
 import '../../../core/models/practice_models.dart';
-import '../practice_state.dart';
 import 'practice_item_tile.dart';
 
 /// Pratik detayındaki seviye kartı: ilerleme çubuğu ve açılınca içerik

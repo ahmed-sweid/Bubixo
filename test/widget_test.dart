@@ -27,7 +27,8 @@ import 'package:en_bubixo/features/lessons/cubit/lessons_cubit.dart';
 import 'package:en_bubixo/features/onboarding/onboarding_screen.dart';
 import 'package:en_bubixo/features/practice/practice_detail_screen.dart';
 import 'package:en_bubixo/features/practice/practice_screen.dart';
-import 'package:en_bubixo/features/practice/practice_state.dart';
+import 'package:en_bubixo/features/practice/cubit/practice_cubit.dart';
+import 'package:en_bubixo/features/practice/cubit/practice_detail_cubit.dart';
 import 'package:en_bubixo/features/profile/profile_screen.dart';
 import 'package:en_bubixo/features/profile/profile_state.dart';
 import 'package:en_bubixo/features/shell/home_shell.dart';
@@ -434,14 +435,24 @@ void main() {
     testWidgets('hata durumunda hata görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const PracticeScreen(state: PracticeError()));
+      await pumpScreen(
+        tester,
+        PracticeScreen(
+          cubit: PracticeCubit(initialState: const PracticeError()),
+        ),
+      );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const PracticeScreen(state: PracticeEmpty()));
+      await pumpScreen(
+        tester,
+        PracticeScreen(
+          cubit: PracticeCubit(initialState: const PracticeEmpty()),
+        ),
+      );
       expect(find.text(StateContent.practiceEmptyTitle), findsOneWidget);
     });
 
@@ -450,9 +461,11 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const PracticeScreen(
-          state: PracticeReady(
-            types: <PracticeTypeProgress>[_practiceProgress],
+        PracticeScreen(
+          cubit: PracticeCubit(
+            initialState: const PracticeReady(
+              types: <PracticeTypeProgress>[_practiceProgress],
+            ),
           ),
         ),
       );
@@ -489,9 +502,9 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const PracticeDetailScreen(
+        PracticeDetailScreen(
           type: PracticeType.sentenceOrder,
-          state: PracticeDetailError(),
+          cubit: PracticeDetailCubit(initialState: const PracticeDetailError()),
         ),
       );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
@@ -502,9 +515,9 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const PracticeDetailScreen(
+        PracticeDetailScreen(
           type: PracticeType.sentenceOrder,
-          state: PracticeDetailEmpty(),
+          cubit: PracticeDetailCubit(initialState: const PracticeDetailEmpty()),
         ),
       );
       expect(find.text(StateContent.practiceEmptyTitle), findsOneWidget);
@@ -515,9 +528,13 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const PracticeDetailScreen(
+        PracticeDetailScreen(
           type: PracticeType.sentenceOrder,
-          state: PracticeDetailReady(progress: _practiceProgress),
+          cubit: PracticeDetailCubit(
+            initialState: const PracticeDetailReady(
+              progress: _practiceProgress,
+            ),
+          ),
         ),
       );
 
