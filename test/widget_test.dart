@@ -23,7 +23,7 @@ import 'package:en_bubixo/features/common/states/app_skeletons.dart';
 import 'package:en_bubixo/features/level/level_test_screen.dart';
 import 'package:en_bubixo/features/level/level_test_state.dart';
 import 'package:en_bubixo/features/lessons/lessons_screen.dart';
-import 'package:en_bubixo/features/lessons/lessons_state.dart';
+import 'package:en_bubixo/features/lessons/cubit/lessons_cubit.dart';
 import 'package:en_bubixo/features/onboarding/onboarding_screen.dart';
 import 'package:en_bubixo/features/practice/practice_detail_screen.dart';
 import 'package:en_bubixo/features/practice/practice_screen.dart';
@@ -266,7 +266,10 @@ void main() {
       int retries = 0;
       await pumpScreen(
         tester,
-        LessonsScreen(state: const LessonsError(), onRetry: () => retries++),
+        LessonsScreen(
+          cubit: LessonsCubit(initialState: const LessonsError()),
+          onRetry: () => retries++,
+        ),
       );
 
       expect(find.text(StateContent.errorTitle), findsOneWidget);
@@ -281,7 +284,10 @@ void main() {
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const LessonsScreen(state: LessonsEmpty()));
+      await pumpScreen(
+        tester,
+        LessonsScreen(cubit: LessonsCubit(initialState: const LessonsEmpty())),
+      );
       expect(find.text(StateContent.lessonsEmptyTitle), findsOneWidget);
     });
 
@@ -290,7 +296,11 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const LessonsScreen(state: LessonsReady(levels: <LessonLevel>[_level])),
+        LessonsScreen(
+          cubit: LessonsCubit(
+            initialState: const LessonsReady(levels: <LessonLevel>[_level]),
+          ),
+        ),
       );
 
       expect(find.text(NavContent.lessonsTitle), findsOneWidget);

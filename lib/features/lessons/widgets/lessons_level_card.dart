@@ -5,7 +5,6 @@ import '../../../core/constants/lessons_content.dart';
 import '../../../core/constants/level_content.dart';
 import '../../../core/design_system.dart';
 import '../../../core/models/lesson_models.dart';
-import '../lessons_state.dart';
 import 'level_test_tile.dart';
 import 'topic_tile.dart';
 
