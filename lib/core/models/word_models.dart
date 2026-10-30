@@ -51,3 +51,12 @@ class PoolWord {
   /// 0 = A1 … 5 = C2 ([LevelContent.cefrLevels] sırasıyla birebir).
   final int levelIndex;
 }
+
+/// Hızlı çeviri kartının gösterdiği son sonuç.
+@immutable
+class WordTranslation {
+  const WordTranslation({required this.term, this.translation});
+
+  final String term;
+  final String? translation;
+}

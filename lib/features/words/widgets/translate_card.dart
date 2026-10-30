@@ -3,7 +3,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../core/constants/words_content.dart';
 import '../../../core/design_system.dart';
-import '../words_state.dart';
+import '../../../core/models/word_models.dart';
 
 /// Hızlı çeviri kartı: dil yönü, giriş alanı ve isteğe bağlı sonuç.
 class TranslateCard extends StatelessWidget {

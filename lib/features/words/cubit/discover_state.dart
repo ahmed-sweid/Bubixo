@@ -1,8 +1,10 @@
-import '../../core/models/word_models.dart';
+part of 'discover_cubit.dart';
 
-/// Kelime Keşfet sayfasının Cubit'e hazır durum kümesi.
-sealed class DiscoverState {
+sealed class DiscoverState extends Equatable {
   const DiscoverState();
+
+  @override
+  List<Object?> get props => const <Object?>[];
 }
 
 final class DiscoverLoading extends DiscoverState {
@@ -22,4 +24,7 @@ final class DiscoverReady extends DiscoverState {
 
   final List<PoolWord> words;
   final List<String> categories;
+
+  @override
+  List<Object?> get props => <Object?>[words, categories];
 }

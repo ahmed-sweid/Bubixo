@@ -36,7 +36,7 @@ import 'package:en_bubixo/features/splash/splash_screen.dart';
 import 'package:en_bubixo/features/stories/stories_screen.dart';
 import 'package:en_bubixo/features/stories/cubit/stories_cubit.dart';
 import 'package:en_bubixo/features/words/words_screen.dart';
-import 'package:en_bubixo/features/words/words_state.dart';
+import 'package:en_bubixo/features/words/cubit/words_cubit.dart';
 
 // --- Sabit test verileri ----------------------------------------------------
 
@@ -386,14 +386,20 @@ void main() {
     testWidgets('hata durumunda hata görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const WordsScreen(state: WordsError()));
+      await pumpScreen(
+        tester,
+        WordsScreen(cubit: WordsCubit(initialState: const WordsError())),
+      );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
       WidgetTester tester,
     ) async {
-      await pumpScreen(tester, const WordsScreen(state: WordsEmpty()));
+      await pumpScreen(
+        tester,
+        WordsScreen(cubit: WordsCubit(initialState: const WordsEmpty())),
+      );
       expect(find.text(StateContent.wordsEmptyTitle), findsOneWidget);
     });
 
@@ -402,7 +408,11 @@ void main() {
     ) async {
       await pumpScreen(
         tester,
-        const WordsScreen(state: WordsReady(words: <Word>[_word])),
+        WordsScreen(
+          cubit: WordsCubit(
+            initialState: const WordsReady(words: <Word>[_word]),
+          ),
+        ),
       );
 
       expect(find.text(NavContent.wordsTitle), findsOneWidget);
