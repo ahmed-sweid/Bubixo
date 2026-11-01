@@ -1,4 +1,5 @@
 import 'package:en_bubixo/features/auth/cubit/auth_cubit.dart';
+import 'package:en_bubixo/features/level/cubit/level_test_cubit.dart';
 import 'package:en_bubixo/features/lessons/cubit/lessons_cubit.dart';
 import 'package:en_bubixo/features/words/cubit/words_cubit.dart';
 import 'package:en_bubixo/shared/service_locator.dart';
@@ -31,6 +32,13 @@ void main() {
 
     test('kelimeler cubit repository ile kuruluyor', () {
       final WordsCubit cubit = sl<WordsCubit>();
+      addTearDown(cubit.close);
+
+      expect(cubit.repository, isNotNull);
+    });
+
+    test('seviye testi cubit repository ile kuruluyor', () {
+      final LevelTestCubit cubit = sl<LevelTestCubit>();
       addTearDown(cubit.close);
 
       expect(cubit.repository, isNotNull);
