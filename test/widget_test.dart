@@ -11,6 +11,7 @@ import 'package:en_bubixo/core/constants/practice_content.dart';
 import 'package:en_bubixo/core/constants/profile_content.dart';
 import 'package:en_bubixo/core/constants/splash_content.dart';
 import 'package:en_bubixo/core/constants/state_content.dart';
+import 'package:en_bubixo/core/constants/stories_content.dart';
 import 'package:en_bubixo/core/constants/words_content.dart';
 import 'package:en_bubixo/core/design_system.dart';
 import 'package:en_bubixo/core/models/level_test_models.dart';
@@ -36,6 +37,7 @@ import 'package:en_bubixo/features/shell/home_shell.dart';
 import 'package:en_bubixo/features/shell/widgets/nav_tab.dart';
 import 'package:en_bubixo/features/splash/splash_screen.dart';
 import 'package:en_bubixo/features/stories/stories_screen.dart';
+import 'package:en_bubixo/features/stories/story_reading_screen.dart';
 import 'package:en_bubixo/features/stories/cubit/stories_cubit.dart';
 import 'package:en_bubixo/features/words/words_screen.dart';
 import 'package:en_bubixo/features/words/cubit/words_cubit.dart';
@@ -234,6 +236,10 @@ void main() {
     );
     await tester.tap(storiesTab);
     await advance(tester);
+    // Hikâyeler sekmesi açılırken kubite bağlı kısa bir gecikme çalışır;
+    // zamanlayıcı test bitmeden tükenmeli.
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
 
     expect(tester.widget<NavTab>(storiesTab).selected, isTrue);
     expect(
@@ -332,8 +338,43 @@ void main() {
     testWidgets('yükleme durumunda iskelet gösterir', (
       WidgetTester tester,
     ) async {
+      await pumpScreen(tester, StoriesScreen(cubit: StoriesCubit()));
+      expect(find.byType(StoriesSkeleton), findsOneWidget);
+    });
+
+    testWidgets('kendi cubitiyle demo kataloğunu yükler', (
+      WidgetTester tester,
+    ) async {
       await pumpScreen(tester, const StoriesScreen());
       expect(find.byType(StoriesSkeleton), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+
+      expect(find.byType(StoriesSkeleton), findsNothing);
+      expect(find.text(StoriesContent.continueSectionLabel), findsOneWidget);
+      expect(
+        find.text(StoriesContent.demoStories.first.title),
+        findsNWidgets(2),
+      );
+    });
+
+    testWidgets('hikâye kartına dokununca okuma ekranı açılır', (
+      WidgetTester tester,
+    ) async {
+      await pumpScreen(tester, const StoriesScreen());
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+
+      final Story second = StoriesContent.demoStories[1];
+      await tester.tap(find.text(second.title));
+      await advance(tester);
+
+      expect(find.byType(StoryReadingScreen), findsOneWidget);
+      expect(
+        find.text(second.sentences.first.split(' ').first),
+        findsOneWidget,
+      );
     });
 
     testWidgets('hata durumunda hata görünümü gösterir', (

@@ -9,7 +9,7 @@ import 'widgets/stories_empty_view.dart';
 import 'widgets/stories_view.dart';
 
 /// Hikâyeler sekmesi: cubit durumuna göre yükleme, hata, boş veya hazır
-/// görünümü seçer.
+/// görünümü seçer. Kendi cubit'i ekran açılırken kataloğu yükler.
 class StoriesScreen extends StatelessWidget {
   const StoriesScreen({super.key, this.cubit, this.onRetry});
 
@@ -19,14 +19,16 @@ class StoriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<StoriesCubit>(
-      create: (_) => cubit ?? StoriesCubit(),
+      create: (_) => cubit ?? (StoriesCubit()..load()),
       child: BlocBuilder<StoriesCubit, StoriesState>(
         builder: (BuildContext context, StoriesState state) {
           return Scaffold(
             backgroundColor: AppColors.canvas,
             body: switch (state) {
               StoriesLoading() => const StoriesSkeleton(),
-              StoriesError() => AppErrorView(onRetry: onRetry),
+              StoriesError() => AppErrorView(
+                onRetry: onRetry ?? () => context.read<StoriesCubit>().load(),
+              ),
               StoriesEmpty() => const StoriesEmptyView(),
               StoriesReady(
                 :final stories,
