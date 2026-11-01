@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../models/auth_models.dart';
 import 'supabase_backend.dart';
 
 /// Oturum durumu: `AuthSession` elle token saklamaz, flutter_secure_storage
@@ -19,10 +20,21 @@ class AuthSession extends ChangeNotifier {
   bool _authenticated = false;
   String? _userId;
   String? _email;
+  String? _displayName;
 
   bool get isAuthenticated => _authenticated;
   String? get userId => _userId;
   String? get email => _email;
+
+  /// Kayıt sırasında gönderilen ad (`raw_user_meta_data.display_name`).
+  String? get displayName => _displayName;
+
+  /// Oturum yoksa `null`. Cubit'ler ve ekranlar SDK `User` yerine bunu görür.
+  AuthAccount? get account {
+    final id = _userId;
+    if (id == null) return null;
+    return AuthAccount(id: id, email: _email, displayName: _displayName);
+  }
 
   void _attach() {
     if (!_backend.isReady) return;
@@ -38,16 +50,22 @@ class AuthSession extends ChangeNotifier {
   }
 
   void _apply(Session? session) {
-    final next = session?.user != null;
-    final nextId = session?.user.id;
-    final nextEmail = session?.user.email;
+    final user = session?.user;
+    final next = user != null;
+    final nextId = user?.id;
+    final nextEmail = user?.email;
+    final nextName = user?.userMetadata?['display_name'] as String?;
 
-    if (next == _authenticated && nextId == _userId && nextEmail == _email) {
+    if (next == _authenticated &&
+        nextId == _userId &&
+        nextEmail == _email &&
+        nextName == _displayName) {
       return;
     }
     _authenticated = next;
     _userId = nextId;
     _email = nextEmail;
+    _displayName = nextName;
     notifyListeners();
   }
 
