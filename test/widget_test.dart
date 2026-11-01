@@ -1,3 +1,4 @@
+import 'package:dart_either/dart_either.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,7 +14,7 @@ import 'package:en_bubixo/core/constants/splash_content.dart';
 import 'package:en_bubixo/core/constants/state_content.dart';
 import 'package:en_bubixo/core/constants/words_content.dart';
 import 'package:en_bubixo/core/design_system.dart';
-import 'package:en_bubixo/core/models/level_test_models.dart';
+import 'package:en_bubixo/core/error/failure.dart';
 import 'package:en_bubixo/core/models/lesson_models.dart';
 import 'package:en_bubixo/core/models/practice_models.dart';
 import 'package:en_bubixo/core/models/profile_models.dart';
@@ -22,6 +23,8 @@ import 'package:en_bubixo/core/models/word_models.dart';
 import 'package:en_bubixo/features/auth/login_screen.dart';
 import 'package:en_bubixo/features/common/states/app_skeletons.dart';
 import 'package:en_bubixo/features/level/cubit/level_test_cubit.dart';
+import 'package:en_bubixo/features/level/data/models/placement_models.dart';
+import 'package:en_bubixo/features/level/data/repositories/placement_repository.dart';
 import 'package:en_bubixo/features/level/level_test_screen.dart';
 import 'package:en_bubixo/features/lessons/lessons_screen.dart';
 import 'package:en_bubixo/features/lessons/cubit/lessons_cubit.dart';
@@ -144,22 +147,97 @@ const UserProfile _profile = UserProfile(
   levelIndex: 0,
 );
 
-const LevelTestQuestion _testQuestion1 = LevelTestQuestion(
+const PlacementQuestion _testQuestion1 = PlacementQuestion(
+  id: '11',
+  code: 'A1_S1_01',
+  stage: 1,
+  cefrLevel: 'A1',
   prompt: 'Pick one.',
-  options: <String>['alpha', 'beta'],
-  correctIndex: 0,
+  options: <PlacementOption>[
+    PlacementOption(id: 'a', text: 'alpha'),
+    PlacementOption(id: 'b', text: 'beta'),
+  ],
 );
 
-const LevelTestQuestion _testQuestion2 = LevelTestQuestion(
+const PlacementQuestion _testQuestion2 = PlacementQuestion(
+  id: '22',
+  code: 'A2_S1_02',
+  stage: 1,
+  cefrLevel: 'A2',
   prompt: 'Pick another.',
-  options: <String>['charlie', 'delta'],
-  correctIndex: 0,
+  options: <PlacementOption>[
+    PlacementOption(id: 'a', text: 'charlie'),
+    PlacementOption(id: 'b', text: 'delta'),
+  ],
 );
 
-const List<LevelTestQuestion> _testQuestions = <LevelTestQuestion>[
-  _testQuestion1,
-  _testQuestion2,
-];
+PlacementRoute _questionRoute(PlacementQuestion question) => PlacementRoute(
+  finished: false,
+  stage: question.stage,
+  outcome: null,
+  question: question,
+);
+
+PlacementRoute _finishedRoute(String level) => PlacementRoute(
+  finished: true,
+  stage: 2,
+  outcome: PlacementOutcome(
+    level: level,
+    confidence: 'high',
+    totalQuestions: 2,
+    correctAnswers: 1,
+    score: 50,
+  ),
+);
+
+/// Seviye testi akışı sunucu güdümlü olduğu için widget testi de bir
+/// `PlacementRepository` sahtesiyle beslenir: `startAttempt` ilk soruyu,
+/// `submitAnswer` `steps` listesindeki sıradaki adımı döner.
+class _FakePlacementRepository implements PlacementRepository {
+  _FakePlacementRepository({required this.steps});
+
+  final List<PlacementRoute> steps;
+  final List<String> submittedAnswerIds = <String>[];
+
+  @override
+  Future<Either<Failure, PlacementSession?>> startAttempt() async {
+    return Right<Failure, PlacementSession?>(
+      PlacementSession(
+        test: const PlacementTest(
+          id: '1',
+          code: 'default',
+          title: 'Seviye Testi',
+          version: 1,
+        ),
+        attemptId: '7',
+        attemptNumber: 1,
+        route: _questionRoute(_testQuestion1),
+      ),
+    );
+  }
+
+  @override
+  Future<Either<Failure, PlacementAnswer>> submitAnswer({
+    required String attemptId,
+    required String questionId,
+    required String answerId,
+    int? responseTimeMs,
+  }) async {
+    submittedAnswerIds.add(answerId);
+    return Right<Failure, PlacementAnswer>(
+      PlacementAnswer(
+        isCorrect: true,
+        selectedAnswerId: answerId,
+        route: steps[submittedAnswerIds.length - 1],
+      ),
+    );
+  }
+
+  @override
+  Future<Either<Failure, PlacementOutcome>> fetchResult(
+    String attemptId,
+  ) async => throw UnimplementedError('sonuç ekranı route ile kapanır');
+}
 
 // --- Yardımcılar ------------------------------------------------------------
 
@@ -626,16 +704,20 @@ void main() {
       expect(find.byType(LevelTestSkeleton), findsOneWidget);
     });
 
-    testWidgets('hata durumunda hata görünümü gösterir', (
+    testWidgets('hata durumunda hata metni ve tekrar dene gösterilir', (
       WidgetTester tester,
     ) async {
       await pumpScreen(
         tester,
         LevelTestScreen(
-          cubit: LevelTestCubit(initialState: const LevelTestError()),
+          cubit: LevelTestCubit(
+            initialState: const LevelTestError(message: 'Sunucu cevap vermiyor'),
+          ),
         ),
       );
       expect(find.text(StateContent.errorTitle), findsOneWidget);
+      expect(find.text('Sunucu cevap vermiyor'), findsOneWidget);
+      expect(find.text(StateContent.retryLabel), findsOneWidget);
     });
 
     testWidgets('boş durumda boş görünümü gösterir', (
@@ -650,53 +732,86 @@ void main() {
       expect(find.text(StateContent.levelTestEmptyTitle), findsOneWidget);
     });
 
-    testWidgets('doğru cevaplarla sonucu hesaplar ve onayı iletir', (
+    testWidgets('cevaplar sunucuya gider, sıradaki soru ve sunucu seviyesi gelir', (
       WidgetTester tester,
     ) async {
+      final _FakePlacementRepository repository = _FakePlacementRepository(
+        steps: <PlacementRoute>[
+          _questionRoute(_testQuestion2),
+          _finishedRoute('B1'),
+        ],
+      );
+      // Cubit'i kendimiz kapatmayız: BlocProvider `create` ile sahiplenir ve
+      // ağaç sökülken kapatır. addTearDown(cubit.close) testi sonlandurmaz.
+      final LevelTestCubit cubit = LevelTestCubit(repository: repository);
+      await cubit.start();
+
       int? completedLevel;
       await pumpScreen(
         tester,
         LevelTestScreen(
-          cubit: LevelTestCubit(
-            initialState: const LevelTestReady(questions: _testQuestions),
-          ),
+          cubit: cubit,
           onCompleted: (int levelIndex) => completedLevel = levelIndex,
         ),
       );
 
+      // Aşamanın üst sınırı çizilir: sunucu kaç soru geleceğini önceden bildirmez.
       expect(
         find.text(
           LevelTestContent.questionProgressTemplate
               .replaceFirst('{index}', '1')
-              .replaceFirst('{total}', '2'),
+              .replaceFirst('{total}', '${LevelTestContent.stageQuestionCap(1)}'),
         ),
         findsOneWidget,
       );
       expect(find.text(_testQuestion1.prompt), findsOneWidget);
 
-      for (final LevelTestQuestion question in _testQuestions) {
-        await tester.tap(find.text(question.options[question.correctIndex]));
-        await advance(tester);
-        await tester.tap(find.text(LevelTestContent.ctaLabel));
-        await advance(tester);
-      }
-
-      final int expectedLevel = (_testQuestions.length - 1).clamp(
-        0,
-        LevelContent.cefrLevels.length - 1,
+      expect(
+        tester
+            .widget<ElevatedButton>(
+              find.widgetWithText(ElevatedButton, LevelTestContent.ctaLabel),
+            )
+            .onPressed,
+        isNull,
+        reason: 'seçim yapılmadan devam edilemez',
       );
 
-      expect(find.text(LevelTestContent.resultBadgeLabel), findsOneWidget);
-      expect(find.text(LevelContent.cefrLevels[expectedLevel]), findsOneWidget);
+      await tester.tap(find.text(_testQuestion1.options[0].text));
+      await advance(tester);
+      await tester.tap(find.text(LevelTestContent.ctaLabel));
+      await advance(tester);
+
+      expect(find.text(_testQuestion2.prompt), findsOneWidget);
       expect(
-        find.text(LevelTestContent.resultInfos[expectedLevel]),
+        find.text(
+          LevelTestContent.questionProgressTemplate
+              .replaceFirst('{index}', '2')
+              .replaceFirst('{total}', '${LevelTestContent.stageQuestionCap(1)}'),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text(_testQuestion2.options[1].text));
+      await advance(tester);
+      await tester.tap(find.text(LevelTestContent.ctaLabel));
+      await advance(tester);
+
+      expect(
+        repository.submittedAnswerIds,
+        <String>[_testQuestion1.options[0].id, _testQuestion2.options[1].id],
+        reason: 'seçeneğin metni değil id\'si gönderilir',
+      );
+      expect(find.text(LevelTestContent.resultBadgeLabel), findsOneWidget);
+      expect(find.text('B1'), findsOneWidget);
+      expect(
+        find.text(LevelTestContent.resultInfos[LevelContent.cefrLevels.indexOf('B1')]),
         findsOneWidget,
       );
 
       await tester.tap(find.text(LevelTestContent.confirmLabel));
       await tester.pump();
 
-      expect(completedLevel, expectedLevel);
+      expect(completedLevel, LevelContent.cefrLevels.indexOf('B1'));
     });
   });
 }

@@ -11,6 +11,9 @@ import '../features/auth/data/repositories/auth_repository.dart';
 import '../features/lessons/cubit/lessons_cubit.dart';
 import '../features/lessons/data/datasources/lesson_remote_data_source.dart';
 import '../features/lessons/data/repositories/lesson_repository.dart';
+import '../features/level/cubit/level_test_cubit.dart';
+import '../features/level/data/datasources/placement_remote_data_source.dart';
+import '../features/level/data/repositories/placement_repository.dart';
 import '../features/words/cubit/words_cubit.dart';
 import '../features/words/data/datasources/word_remote_data_source.dart';
 import '../features/words/data/repositories/word_repository.dart';
@@ -41,6 +44,7 @@ Future<void> initDependencies({SupabaseClient? supabase}) async {
   _initAuth();
   _initLessons();
   _initWords();
+  _initLevelTest();
 }
 
 /// Özellik başına ayrı kayıt bölümü: her veri katmanı kendi fonksiyonunda.
@@ -82,6 +86,21 @@ void _initWords() {
   );
 
   sl.registerFactory<WordsCubit>(() => WordsCubit(repository: sl()));
+}
+
+void _initLevelTest() {
+  sl.registerLazySingleton<PlacementRemoteDataSource>(
+    () => PlacementRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<PlacementRepository>(
+    () => PlacementRepositoryImpl(sl(), sl()),
+  );
+
+  // Her açılışta taze cubit: testin ilerleme durumu ekranda yaşar, yarıda
+  // bırakılan oturum sunucuda `in_progress` olarak bekler ve tekrar
+  // açıldığında aynı oturumdan devam eder.
+  sl.registerFactory<LevelTestCubit>(() => LevelTestCubit(repository: sl()));
 }
 
 /// Özellik bazlı kayıt yardımcısı: widget testleri `initDependencies()`
