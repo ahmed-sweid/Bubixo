@@ -3,15 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/level_test_content.dart';
 import '../../core/design_system.dart';
+import '../../shared/service_locator.dart';
 import '../common/states/app_error_view.dart';
 import '../common/states/app_skeletons.dart';
 import 'cubit/level_test_cubit.dart';
+import 'data/repositories/placement_repository.dart';
 import 'widgets/level_test_empty_view.dart';
 import 'widgets/level_test_question_view.dart';
 import 'widgets/level_test_result_view.dart';
 
 /// Seviye belirleme testi: cubit durumuna göre yükleme, hata, boş, soru
-/// akışı veya sonuç görünümünü seçer.
+/// akışı veya sonuç görünümünü seçer. Kendi cubit'i verilmezse DI'dan alır
+/// ve oturumu başlatır.
 class LevelTestScreen extends StatelessWidget {
   const LevelTestScreen({
     super.key,
@@ -31,7 +34,7 @@ class LevelTestScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<LevelTestCubit>(
-      create: (_) => cubit ?? LevelTestCubit(),
+      create: (_) => cubit ?? _cubitFromLocator(),
       child: BlocBuilder<LevelTestCubit, LevelTestState>(
         builder: (BuildContext context, LevelTestState state) {
           final LevelTestCubit controller = context.read<LevelTestCubit>();
@@ -40,18 +43,24 @@ class LevelTestScreen extends StatelessWidget {
             appBar: AppBar(title: const Text(LevelTestContent.appBarTitle)),
             body: switch (state) {
               LevelTestLoading() => const LevelTestSkeleton(),
-              LevelTestError() => AppErrorView(onRetry: onRetry),
+              LevelTestError(:final message) => AppErrorView(
+                message: message,
+                onRetry: onRetry ?? controller.start,
+              ),
               LevelTestEmpty() => const LevelTestEmptyView(),
               LevelTestReady(
-                :final questions,
-                :final questionIndex,
-                :final selectedOption,
+                :final question,
+                :final answeredCount,
+                :final totalCap,
+                :final selectedIndex,
+                :final isSubmitting,
               ) =>
                 LevelTestQuestionView(
-                  question: questions[questionIndex],
-                  index: questionIndex,
-                  total: questions.length,
-                  selectedOption: selectedOption,
+                  question: question,
+                  index: answeredCount,
+                  total: totalCap,
+                  selectedOption: selectedIndex,
+                  isSubmitting: isSubmitting,
                   onSelectOption: controller.selectOption,
                   onContinue: controller.advance,
                 ),
@@ -65,5 +74,14 @@ class LevelTestScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  /// Veri katmanı kayıtlıysa (üretim) gerçek cubit, değilse boşta kalan
+  /// iskelet — widget testleri ekranı tek başına render eder.
+  LevelTestCubit _cubitFromLocator() {
+    final PlacementRepository? repository = slIfRegistered<PlacementRepository>();
+    return repository == null
+        ? LevelTestCubit()
+        : LevelTestCubit(repository: repository)..start();
   }
 }

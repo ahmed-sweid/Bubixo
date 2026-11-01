@@ -17,11 +17,17 @@ class WordsView extends StatefulWidget {
     required this.words,
     this.suggestedWords = const <PoolWord>[],
     this.translation,
+    this.enToTr = true,
+    this.onTranslate,
+    this.onSwap,
   });
 
   final List<Word> words;
   final List<PoolWord> suggestedWords;
   final WordTranslation? translation;
+  final bool enToTr;
+  final ValueChanged<String>? onTranslate;
+  final VoidCallback? onSwap;
 
   @override
   State<WordsView> createState() => _WordsViewState();
@@ -149,6 +155,9 @@ class _WordsViewState extends State<WordsView> {
                     child: TranslateCard(
                       controller: _inputController,
                       result: widget.translation,
+                      enToTr: widget.enToTr,
+                      onTranslate: widget.onTranslate,
+                      onSwap: widget.onSwap,
                     ),
                   ),
                 ),

@@ -12,7 +12,12 @@ final class WordsLoading extends WordsState {
 }
 
 final class WordsError extends WordsState {
-  const WordsError();
+  const WordsError({this.message});
+
+  final String? message;
+
+  @override
+  List<Object?> get props => <Object?>[message];
 }
 
 final class WordsEmpty extends WordsState {
@@ -31,6 +36,18 @@ final class WordsReady extends WordsState {
   final List<PoolWord> suggestedWords;
   final WordTranslation? translation;
   final bool enToTr;
+
+  WordsReady copyWith({
+    List<Word>? words,
+    List<PoolWord>? suggestedWords,
+    WordTranslation? translation,
+    bool? enToTr,
+  }) => WordsReady(
+    words: words ?? this.words,
+    suggestedWords: suggestedWords ?? this.suggestedWords,
+    translation: translation ?? this.translation,
+    enToTr: enToTr ?? this.enToTr,
+  );
 
   @override
   List<Object?> get props => <Object?>[

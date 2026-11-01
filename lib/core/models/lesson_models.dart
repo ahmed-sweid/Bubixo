@@ -55,6 +55,7 @@ class Lesson {
     required this.body,
     required this.questions,
     this.type = LessonType.lesson,
+    this.isCompleted = false,
   });
 
   final String id;
@@ -65,6 +66,10 @@ class Lesson {
   final List<String> body;
   final List<LessonQuestion> questions;
   final LessonType type;
+
+  /// `lesson_user_progress.status == 'completed'` — catalog görünümünden gelir,
+  /// seviye kartındaki ilerleme çubuğu bundan hesaplanır.
+  final bool isCompleted;
 }
 
 /// Tek bir CEFR seviyesinin iki track'e ait dersleri ve ilerlemesi.
