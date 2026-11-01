@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/profile_content.dart';
 import '../../core/design_system.dart';
 import '../../core/models/profile_models.dart';
+import '../../core/services/sound_service.dart';
 import 'widgets/choice_tile.dart';
 import 'widgets/settings_sheet.dart';
 import 'widgets/speed_chips.dart';
@@ -14,6 +15,7 @@ import 'widgets/switch_tile.dart';
 /// bildirir; kalıcılığı cubit üstlenir. Sheet yalnızca kendi geçici
 /// seçimini tutar, böylece dokunuş anında görünüm canlı kalır.
 Future<void> _openSheet(BuildContext context, Widget sheet) {
+  SoundService.instance.play(SoundEvent.menuOpen);
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -179,9 +181,12 @@ Future<void> showAudioSheet(
                 description: ProfileContent.soundEffectsDescription,
                 value: value.soundEffects,
                 onChanged: (bool enabled) {
+                  SoundService.instance.enabled = enabled;
                   final AudioPrefs next = value.copyWith(soundEffects: enabled);
                   update(next);
                   onChanged(next);
+                  // Açıkken tek bir dokunuş sesi ayarı hemen gösterir.
+                  SoundService.instance.play(SoundEvent.tap);
                 },
               ),
               const SizedBox(height: AppSpacing.base),

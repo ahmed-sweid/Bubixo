@@ -5,6 +5,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../core/constants/words_content.dart';
 import '../../core/design_system.dart';
 import '../../core/models/word_models.dart';
+import '../../core/services/sound_service.dart';
 import 'widgets/dashed_progress.dart';
 import 'word_memorize_result_screen.dart';
 
@@ -56,6 +57,9 @@ class _WordMemorizeScreenState extends State<WordMemorizeScreen>
   void _onDragEnd() {
     if (_dragX.abs() >= 100) {
       _swipeKnown = _dragX > 0;
+      SoundService.instance.play(
+        _swipeKnown ? SoundEvent.memorize : SoundEvent.drag,
+      );
       _exitController.forward(from: 0).then((_) => _advance());
     } else {
       setState(() => _dragX = 0);
@@ -84,6 +88,7 @@ class _WordMemorizeScreenState extends State<WordMemorizeScreen>
     if (!mounted) {
       return;
     }
+    SoundService.instance.play(SoundEvent.reward);
     final List<Word> knownWords = widget.words
         .where((Word word) => _knownIds.contains(word.id))
         .toList();

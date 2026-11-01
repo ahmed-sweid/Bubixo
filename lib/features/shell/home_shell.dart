@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../core/constants/nav_content.dart';
 import '../../core/design_system.dart';
+import '../../core/services/sound_service.dart';
 import '../lessons/lessons_screen.dart';
 import '../practice/practice_screen.dart';
 import '../profile/profile_screen.dart';
@@ -47,6 +48,7 @@ class _HomeShellState extends State<HomeShell> {
       return;
     }
     HapticFeedback.selectionClick();
+    SoundService.instance.play(SoundEvent.transition);
     setState(() => _currentIndex = index);
   }
 

@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../core/constants/practice_content.dart';
 import '../../core/design_system.dart';
 import '../../core/models/practice_models.dart';
+import '../../core/services/sound_service.dart';
 import 'practice_launcher.dart';
 import 'widgets/practice_session_frame.dart';
 
@@ -37,6 +38,11 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   bool get _isLast => _index == _prompts.length - 1;
 
   void _toggleRecording() {
+    if (_recording) {
+      SoundService.instance.play(SoundEvent.goalReached);
+    } else {
+      SoundService.instance.play(SoundEvent.tap);
+    }
     setState(() {
       if (_recording) {
         _recording = false;
@@ -52,6 +58,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   }
 
   void _retry() {
+    SoundService.instance.play(SoundEvent.tap);
     setState(() {
       _recorded = false;
       _recording = false;
@@ -60,6 +67,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
 
   void _advance() {
     if (_isLast) {
+      SoundService.instance.play(SoundEvent.sessionComplete);
       openPracticeResult(
         context,
         _type,
@@ -69,6 +77,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
       );
       return;
     }
+    SoundService.instance.play(SoundEvent.transition);
     setState(() {
       _index++;
       _recording = false;

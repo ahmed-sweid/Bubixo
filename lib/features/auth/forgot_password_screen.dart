@@ -3,6 +3,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../core/constants/auth_content.dart';
 import '../../core/design_system.dart';
+import '../../core/services/sound_service.dart';
 import 'auth_validators.dart';
 
 /// Şifre sıfırlama ekranı: e-posta formu, gönderim sonrası "mesaj gönderildi"
@@ -30,9 +31,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   void _sendLink() {
     final bool isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) {
+      SoundService.instance.play(SoundEvent.wrong);
       return;
     }
     // TODO(backend): e-posta gönderim servisi buraya bağlanacak.
+    SoundService.instance.play(SoundEvent.correct);
     setState(() {
       _sentEmail = _emailController.text.trim();
       _isSent = true;

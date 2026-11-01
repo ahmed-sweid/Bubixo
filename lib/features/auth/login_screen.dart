@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../core/constants/auth_content.dart';
 import '../../core/design_system.dart';
+import '../../core/services/sound_service.dart';
 import 'auth_validators.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
@@ -33,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _goToLevel() {
+    SoundService.instance.play(SoundEvent.transition);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(builder: (_) => const LevelScreen()),
     );
@@ -41,18 +43,21 @@ class _LoginScreenState extends State<LoginScreen> {
   void _submit() {
     final bool isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) {
+      SoundService.instance.play(SoundEvent.wrong);
       return;
     }
     _goToLevel();
   }
 
   void _openSignup() {
+    SoundService.instance.play(SoundEvent.tap);
     Navigator.of(
       context,
     ).push(MaterialPageRoute<void>(builder: (_) => const SignupScreen()));
   }
 
   void _openForgotPassword() {
+    SoundService.instance.play(SoundEvent.tap);
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const ForgotPasswordScreen()),
     );

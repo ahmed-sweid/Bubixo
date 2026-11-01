@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/splash_content.dart';
 import '../../core/design_system.dart';
+import '../../core/services/sound_service.dart';
 import '../auth/login_screen.dart';
 import '../onboarding/onboarding_screen.dart';
 import 'widgets/bubixo_mark.dart';
@@ -54,6 +55,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (!reducedMotion) {
       _float.repeat(reverse: true);
     }
+    SoundService.instance.play(SoundEvent.launch);
   }
 
   @override

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'core/design_system.dart';
+import 'core/services/sound_service.dart';
 import 'features/splash/splash_screen.dart';
 
 void main() {
+  // Yalnızca gerçek uygulamada başlatılır; widget testleri servisi init etmez
+  // ve bu sayede ses katmanı sessiz kalır.
+  SoundService.instance.init();
   runApp(const BubixoApp());
 }
 

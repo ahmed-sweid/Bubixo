@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/practice_content.dart';
 import '../../core/design_system.dart';
 import '../../core/models/practice_models.dart';
+import '../../core/services/sound_service.dart';
 import '../common/widgets/option_card.dart';
 import 'practice_launcher.dart';
 import 'widgets/practice_session_frame.dart';
@@ -36,6 +37,7 @@ class _FillBlankScreenState extends State<FillBlankScreen> {
     if (_checked) {
       return;
     }
+    SoundService.instance.play(SoundEvent.optionSelect);
     setState(() => _selected = optionIndex);
   }
 
@@ -44,6 +46,7 @@ class _FillBlankScreenState extends State<FillBlankScreen> {
       return;
     }
     final bool correct = _selected == _question.correctIndex;
+    SoundService.instance.play(correct ? SoundEvent.correct : SoundEvent.wrong);
     setState(() {
       _checked = true;
       _isCorrect = correct;
@@ -55,6 +58,7 @@ class _FillBlankScreenState extends State<FillBlankScreen> {
 
   void _advance() {
     if (_isLast) {
+      SoundService.instance.play(SoundEvent.sessionComplete);
       openPracticeResult(
         context,
         _type,
@@ -64,6 +68,7 @@ class _FillBlankScreenState extends State<FillBlankScreen> {
       );
       return;
     }
+    SoundService.instance.play(SoundEvent.transition);
     setState(() {
       _index++;
       _selected = null;

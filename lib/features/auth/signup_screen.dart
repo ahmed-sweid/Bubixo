@@ -3,6 +3,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../core/constants/auth_content.dart';
 import '../../core/design_system.dart';
+import '../../core/services/sound_service.dart';
 import '../level/level_screen.dart';
 import 'auth_validators.dart';
 
@@ -37,9 +38,11 @@ class _SignupScreenState extends State<SignupScreen> {
   void _submit() {
     final bool isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) {
+      SoundService.instance.play(SoundEvent.wrong);
       return;
     }
     // TODO(backend): hesap oluşturma servisi buraya bağlanacak.
+    SoundService.instance.play(SoundEvent.transition);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(builder: (_) => const LevelScreen()),
     );
