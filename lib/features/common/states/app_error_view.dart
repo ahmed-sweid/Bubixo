@@ -4,11 +4,12 @@ import '../../../core/constants/state_content.dart';
 import '../../../core/design_system.dart';
 
 /// Hata durumu: her ekranda aynı görsel, başlık ve açıklama. `onRetry`
-/// verildiğinde tekrar dene eylemi gösterilir; veri katmanı bağlanana kadar
-/// eylemsiz de kullanılabilir.
+/// verildiğinde tekrar dene eylemi gösterilir. `message` verilirse açıklama
+/// satırında `Failure.errorMessage` gösterilir; yoksa genel sabit kullanılır.
 class AppErrorView extends StatelessWidget {
-  const AppErrorView({super.key, this.onRetry});
+  const AppErrorView({super.key, this.message, this.onRetry});
 
+  final String? message;
   final VoidCallback? onRetry;
 
   @override
@@ -37,7 +38,7 @@ class AppErrorView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  StateContent.errorMessage,
+                  message ?? StateContent.errorMessage,
                   textAlign: TextAlign.center,
                   style: AppTypography.bodyLg.copyWith(
                     color: AppColors.bodyMuted,
