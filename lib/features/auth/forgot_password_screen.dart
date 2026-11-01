@@ -4,13 +4,16 @@ import 'package:iconsax/iconsax.dart';
 import '../../core/constants/auth_content.dart';
 import '../../core/design_system.dart';
 import '../../core/services/sound_service.dart';
+import '../../shared/service_locator.dart';
 import 'auth_validators.dart';
+import 'cubit/auth_cubit.dart';
 
 /// Şifre sıfırlama ekranı: e-posta formu, gönderim sonrası "mesaj gönderildi"
-/// illüstrasyonlu onay durumu. Gerçek e-posta gönderimi backend'e bağlanınca
-/// [ForgotPasswordContent] akışı içindeki submit'e entegre edilir.
+/// illüstrasyonlu onay durumu.
 class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+  const ForgotPasswordScreen({super.key, this.cubit});
+
+  final AuthCubit? cubit;
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -20,26 +23,52 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   bool _isSent = false;
+  bool _submitting = false;
+  String? _serverError;
   String _sentEmail = '';
+
+  AuthCubit? _ownedCubit;
+
+  AuthCubit get _cubit => _ownedCubit ??= widget.cubit ?? sl<AuthCubit>();
 
   @override
   void dispose() {
     _emailController.dispose();
+    _ownedCubit?.close();
     super.dispose();
   }
 
-  void _sendLink() {
+  Future<void> _sendLink() async {
     final bool isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) {
       SoundService.instance.play(SoundEvent.wrong);
       return;
     }
-    // TODO(backend): e-posta gönderim servisi buraya bağlanacak.
-    SoundService.instance.play(SoundEvent.correct);
+    if (_submitting) return;
+
+    final String email = _emailController.text.trim();
     setState(() {
-      _sentEmail = _emailController.text.trim();
-      _isSent = true;
+      _submitting = true;
+      _serverError = null;
     });
+    // GoTrue kullanıcı listesini sızdırmamak için adres kayıtlı olmasa da
+    // başarı döner; ekran bu yüzden her durumda "kontrol et" sayfasına geçer.
+    await _cubit.sendPasswordResetLink(email: email);
+
+    final AuthState state = _cubit.state;
+    if (!mounted) return;
+    setState(() => _submitting = false);
+
+    if (state is AuthResetLinkSent) {
+      SoundService.instance.play(SoundEvent.correct);
+      setState(() {
+        _sentEmail = state.email;
+        _isSent = true;
+      });
+    } else if (state is AuthError) {
+      setState(() => _serverError = state.message);
+      SoundService.instance.play(SoundEvent.wrong);
+    }
   }
 
   @override
@@ -119,9 +148,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           const SizedBox(height: AppSpacing.lg),
           ElevatedButton(
-            onPressed: _sendLink,
+            onPressed: _submitting ? null : _sendLink,
             child: Text(ForgotPasswordContent.ctaLabel),
           ),
+          if (_serverError != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              _serverError!,
+              style: AppTypography.caption.copyWith(
+                color: AppColors.accentCardinal,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ],
       ),
     );

@@ -4,14 +4,18 @@ import 'package:iconsax/iconsax.dart';
 import '../../core/constants/auth_content.dart';
 import '../../core/design_system.dart';
 import '../../core/services/sound_service.dart';
+import '../../shared/service_locator.dart';
 import '../level/level_screen.dart';
 import 'auth_validators.dart';
+import 'cubit/auth_cubit.dart';
 
 /// Kayıt ekranı: illüstrasyonsuz form (Duolingo'nun kayıt akışı gibi) —
 /// başlık, e-posta/şifre alanları, yeşil HESAP OLUŞTUR CTA ve giriş ekranına
 /// dönen satır.
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  const SignupScreen({super.key, this.cubit});
+
+  final AuthCubit? cubit;
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -25,6 +29,12 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _passwordConfirmController =
       TextEditingController();
   bool _obscurePassword = true;
+  bool _submitting = false;
+  String? _serverError;
+
+  AuthCubit? _ownedCubit;
+
+  AuthCubit get _cubit => _ownedCubit ??= widget.cubit ?? sl<AuthCubit>();
 
   @override
   void dispose() {
@@ -32,20 +42,41 @@ class _SignupScreenState extends State<SignupScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _passwordConfirmController.dispose();
+    _ownedCubit?.close();
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final bool isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) {
       SoundService.instance.play(SoundEvent.wrong);
       return;
     }
-    // TODO(backend): hesap oluşturma servisi buraya bağlanacak.
-    SoundService.instance.play(SoundEvent.transition);
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const LevelScreen()),
+    if (_submitting) return;
+
+    setState(() {
+      _submitting = true;
+      _serverError = null;
+    });
+    await _cubit.signUp(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      displayName: _nameController.text.trim(),
     );
+
+    final AuthState state = _cubit.state;
+    if (!mounted) return;
+    setState(() => _submitting = false);
+
+    if (state is AuthSignedIn) {
+      SoundService.instance.play(SoundEvent.transition);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(builder: (_) => const LevelScreen()),
+      );
+    } else if (state is AuthError) {
+      setState(() => _serverError = state.message);
+      SoundService.instance.play(SoundEvent.wrong);
+    }
   }
 
   @override
@@ -182,9 +213,19 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     ElevatedButton(
-                      onPressed: _submit,
+                      onPressed: _submitting ? null : _submit,
                       child: Text(SignupContent.ctaLabel),
                     ),
+                    if (_serverError != null) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _serverError!,
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.accentCardinal,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                     TextButton(
                       onPressed: () => Navigator.of(context).maybePop(),
                       child: Text(SignupContent.existingAccountLabel),
