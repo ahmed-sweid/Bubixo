@@ -8,6 +8,9 @@ import '../core/network/network_info.dart';
 import '../features/auth/cubit/auth_cubit.dart';
 import '../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../features/auth/data/repositories/auth_repository.dart';
+import '../features/lessons/cubit/lessons_cubit.dart';
+import '../features/lessons/data/datasources/lesson_remote_data_source.dart';
+import '../features/lessons/data/repositories/lesson_repository.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -33,6 +36,7 @@ Future<void> initDependencies({SupabaseClient? supabase}) async {
   );
 
   _initAuth();
+  _initLessons();
 }
 
 /// Özellik başına ayrı kayıt bölümü: her veri katmanı kendi fonksiyonunda.
@@ -51,3 +55,20 @@ void _initAuth() {
     () => AuthCubit(repository: sl(), session: sl()),
   );
 }
+
+void _initLessons() {
+  sl.registerLazySingleton<LessonRemoteDataSource>(
+    () => LessonRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<LessonRepository>(
+    () => LessonRepositoryImpl(sl(), sl()),
+  );
+
+  sl.registerFactory<LessonsCubit>(() => LessonsCubit(repository: sl()));
+}
+
+/// Özellik bazlı kayıt yardımcısı: widget testleri `initDependencies()`
+/// çalıştırmadığı için kayıt yoktur ve ekran veri katmanı olmadan açılır.
+/// Üretimde her zaman kayıtlıdır, bu yüzden tek fark ağa çıkıp çıkmamaktır.
+T? slIfRegistered<T extends Object>() => sl.isRegistered<T>() ? sl<T>() : null;
