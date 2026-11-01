@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/onboarding_content.dart';
 import '../../core/design_system.dart';
+import '../../core/services/sound_service.dart';
 import '../auth/login_screen.dart';
 import 'widgets/page_dots.dart';
 
@@ -27,6 +28,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _advance() {
+    SoundService.instance.play(SoundEvent.transition);
     if (_isLastPage) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(builder: (_) => const LoginScreen()),

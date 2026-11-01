@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../core/constants/profile_content.dart';
 import '../../core/design_system.dart';
 import '../../core/models/profile_models.dart';
+import '../../core/services/sound_service.dart';
 import '../auth/auth_validators.dart';
 import 'widgets/identity_card.dart';
 
@@ -17,6 +18,7 @@ Future<void> showProfileEditSheet(
   required ValueChanged<UserProfile> onSave,
   VoidCallback? onChangePhoto,
 }) {
+  SoundService.instance.play(SoundEvent.menuOpen);
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,

@@ -6,6 +6,7 @@ import '../../../core/constants/state_content.dart';
 import '../../../core/constants/words_content.dart';
 import '../../../core/design_system.dart';
 import '../../../core/models/word_models.dart';
+import '../../../core/services/sound_service.dart';
 import '../../common/states/app_empty_view.dart';
 import '../../common/widgets/category_filter_sheet.dart';
 import '../../common/widgets/level_chip.dart';
@@ -53,6 +54,7 @@ class _WordDiscoverViewState extends State<WordDiscoverView> {
   }
 
   void _showFilterSheet() {
+    SoundService.instance.play(SoundEvent.menuOpen);
     showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext sheetContext) => CategoryFilterSheet(
