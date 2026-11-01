@@ -431,8 +431,7 @@ abstract final class ProfileColumns {
 }
 
 /// Catalog görünümleri — sekmelerin liste sayfaları buradan okur.
-abstract final class LessonsCatalogColumns {
-  static const String lessonId = 'lesson_id';
+abstract final class LessonsCatalogColumns {  static const String lessonId = 'lesson_id';
   static const String levelId = 'level_id';
   static const String levelCode = 'level_code';
   static const String levelTitle = 'level_title';
@@ -451,6 +450,26 @@ abstract final class LessonsCatalogColumns {
 
   static const String all =
       '$lessonId, $levelId, $levelCode, $levelTitle, $title, $orderIndex, $isPublished, $hasContent, $userStatus, $startedAt, $completedAt, $lastOpenedAt, $lastSection, $lastScrollOffset';
+}
+
+/// Gramer konularının catalog görünümü — ders görünümüyle aynı sözleşim,
+/// yalnız anahtar adı farklı.
+abstract final class GrammarCatalogColumns {
+  static const String grammarTopicId = 'grammar_topic_id';
+  static const String levelId = 'level_id';
+  static const String levelCode = 'level_code';
+  static const String levelTitle = 'level_title';
+  static const String title = 'title';
+  static const String orderIndex = 'order_index';
+  static const String isPublished = 'is_published';
+  static const String hasContent = 'has_content';
+  static const String userStatus = 'user_status';
+  static const String startedAt = 'started_at';
+  static const String completedAt = 'completed_at';
+  static const String lastOpenedAt = 'last_opened_at';
+
+  static const String all =
+      '$grammarTopicId, $levelId, $levelCode, $levelTitle, $title, $orderIndex, $isPublished, $hasContent, $userStatus, $startedAt, $completedAt, $lastOpenedAt';
 }
 
 abstract final class StoriesCatalogColumns {
