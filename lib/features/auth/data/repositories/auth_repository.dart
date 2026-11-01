@@ -2,7 +2,7 @@ import 'package:dart_either/dart_either.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
-import '../../../../core/models/auth_models.dart';
+import '../models/auth_models.dart';
 import '../../../../core/network/network_info.dart';
 import '../datasources/auth_remote_data_source.dart';
 

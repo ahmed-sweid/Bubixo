@@ -1,8 +1,8 @@
 import 'package:dart_either/dart_either.dart';
-import 'package:en_bubixo/core/data/auth_session.dart';
+import 'package:en_bubixo/features/auth/data/auth_session.dart';
 import 'package:en_bubixo/core/data/supabase_backend.dart';
 import 'package:en_bubixo/core/error/failure.dart';
-import 'package:en_bubixo/core/models/auth_models.dart';
+import 'package:en_bubixo/features/auth/data/models/auth_models.dart';
 import 'package:en_bubixo/features/auth/cubit/auth_cubit.dart';
 import 'package:en_bubixo/features/auth/data/repositories/auth_repository.dart';
 import 'package:flutter_test/flutter_test.dart';

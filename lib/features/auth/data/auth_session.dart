@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../models/auth_models.dart';
-import 'supabase_backend.dart';
+import '../../../core/data/supabase_backend.dart';
+import 'models/auth_models.dart';
 
 /// Oturum durumu: `AuthSession` elle token saklamaz, flutter_secure_storage
 /// kullanmaz. Supabase SDK oturumu kendi güvenli deposunda tutar ve yeniler;

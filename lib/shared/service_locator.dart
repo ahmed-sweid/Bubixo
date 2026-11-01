@@ -2,7 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../core/data/auth_session.dart';
+import '../features/auth/data/auth_session.dart';
 import '../core/data/supabase_backend.dart';
 import '../core/network/network_info.dart';
 import '../features/auth/cubit/auth_cubit.dart';

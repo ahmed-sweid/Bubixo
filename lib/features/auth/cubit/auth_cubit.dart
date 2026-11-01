@@ -3,9 +3,9 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/auth_content.dart';
-import '../../../core/data/auth_session.dart';
+import '../data/auth_session.dart';
 import '../../../core/error/failure.dart';
-import '../../../core/models/auth_models.dart';
+import '../data/models/auth_models.dart';
 import '../data/repositories/auth_repository.dart';
 
 part 'auth_state.dart';

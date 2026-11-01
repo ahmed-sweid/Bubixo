@@ -1,7 +1,7 @@
 import 'package:dart_either/dart_either.dart';
 import 'package:en_bubixo/core/error/exceptions.dart';
 import 'package:en_bubixo/core/error/failure.dart';
-import 'package:en_bubixo/core/models/auth_models.dart';
+import 'package:en_bubixo/features/auth/data/models/auth_models.dart';
 import 'package:en_bubixo/core/network/network_info.dart';
 import 'package:en_bubixo/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:en_bubixo/features/auth/data/repositories/auth_repository.dart';

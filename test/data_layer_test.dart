@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:en_bubixo/core/constants/error_content.dart';
-import 'package:en_bubixo/core/data/auth_session.dart';
+import 'package:en_bubixo/features/auth/data/auth_session.dart';
 import 'package:en_bubixo/core/data/supabase_backend.dart';
 import 'package:en_bubixo/core/error/exceptions.dart';
 import 'package:en_bubixo/core/error/failure.dart';

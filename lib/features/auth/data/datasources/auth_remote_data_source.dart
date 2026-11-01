@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/data/supabase_backend.dart';
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/models/auth_models.dart';
+import '../models/auth_models.dart';
 
 /// Kimlik doğrulamanın uzak veri kaynağı — GoTrue'ya dokunan **tek** dosya.
 ///
