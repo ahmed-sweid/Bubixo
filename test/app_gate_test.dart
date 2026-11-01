@@ -108,6 +108,11 @@ void main() {
       expect(find.byType(HomeShell), findsOneWidget);
       expect(find.byType(NavTab), findsNWidgets(5));
       expect(find.byType(LoginScreen), findsNothing);
+
+      // Ana ekran hikâyeler sekmesini kurarken kubite bağlı kısa bir gecikme
+      // çalışır; zamanlayıcı test bitmeden tükenmeli.
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
     });
   });
 
