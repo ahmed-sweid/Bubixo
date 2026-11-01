@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/app_config.dart';
+import 'core/data/launch_store.dart';
 import 'core/design_system.dart';
 import 'core/services/sound_service.dart';
-import 'features/splash/splash_screen.dart';
+import 'features/gate/app_gate.dart';
 import 'shared/service_locator.dart';
 
 Future<void> main() async {
@@ -23,6 +24,7 @@ Future<void> main() async {
     supabase: AppConfig.hasSupabase ? Supabase.instance.client : null,
   );
 
+  await LaunchStore.init();
   SoundService.instance.init();
   runApp(const BubixoApp());
 }
@@ -36,7 +38,7 @@ class BubixoApp extends StatelessWidget {
       title: 'Bubixo',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: const SplashScreen(),
+      home: const AppGate(),
     );
   }
 }
