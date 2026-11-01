@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../core/constants/practice_content.dart';
 import '../../core/design_system.dart';
 import '../../core/models/practice_models.dart';
+import '../../core/services/sound_service.dart';
 import '../common/widgets/option_card.dart';
 import 'practice_launcher.dart';
 import 'widgets/practice_session_frame.dart';
@@ -59,6 +60,7 @@ class _ListeningScreenState extends State<ListeningScreen>
     if (_checked) {
       return;
     }
+    SoundService.instance.play(SoundEvent.optionSelect);
     setState(() => _selected = optionIndex);
   }
 
@@ -67,6 +69,7 @@ class _ListeningScreenState extends State<ListeningScreen>
       return;
     }
     final bool correct = _selected == _question.correctIndex;
+    SoundService.instance.play(correct ? SoundEvent.correct : SoundEvent.wrong);
     setState(() {
       _checked = true;
       _isCorrect = correct;
@@ -78,6 +81,7 @@ class _ListeningScreenState extends State<ListeningScreen>
 
   void _advance() {
     if (_isLast) {
+      SoundService.instance.play(SoundEvent.sessionComplete);
       openPracticeResult(
         context,
         _type,
@@ -87,6 +91,7 @@ class _ListeningScreenState extends State<ListeningScreen>
       );
       return;
     }
+    SoundService.instance.play(SoundEvent.transition);
     _player.stop();
     setState(() {
       _index++;

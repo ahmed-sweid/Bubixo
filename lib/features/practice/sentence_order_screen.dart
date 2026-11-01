@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/practice_content.dart';
 import '../../core/design_system.dart';
 import '../../core/models/practice_models.dart';
+import '../../core/services/sound_service.dart';
 import 'practice_launcher.dart';
 import 'widgets/practice_session_frame.dart';
 import 'widgets/sentence_token_chip.dart';
@@ -50,6 +51,7 @@ class _SentenceOrderScreenState extends State<SentenceOrderScreen> {
     if (_checked) {
       return;
     }
+    SoundService.instance.play(SoundEvent.drag);
     setState(() {
       _pool.remove(tokenIndex);
       _placed.add(tokenIndex);
@@ -60,6 +62,7 @@ class _SentenceOrderScreenState extends State<SentenceOrderScreen> {
     if (_checked) {
       return;
     }
+    SoundService.instance.play(SoundEvent.tap);
     setState(() {
       _placed.remove(tokenIndex);
       _pool.add(tokenIndex);
@@ -71,6 +74,7 @@ class _SentenceOrderScreenState extends State<SentenceOrderScreen> {
         .map((int index) => _question.tokens[index])
         .join(' ');
     final bool correct = attempt == _question.answer.join(' ');
+    SoundService.instance.play(correct ? SoundEvent.correct : SoundEvent.wrong);
     setState(() {
       _checked = true;
       _isCorrect = correct;
@@ -82,6 +86,7 @@ class _SentenceOrderScreenState extends State<SentenceOrderScreen> {
 
   void _advance() {
     if (_isLast) {
+      SoundService.instance.play(SoundEvent.sessionComplete);
       openPracticeResult(
         context,
         _type,
@@ -91,6 +96,7 @@ class _SentenceOrderScreenState extends State<SentenceOrderScreen> {
       );
       return;
     }
+    SoundService.instance.play(SoundEvent.transition);
     setState(() {
       _index++;
       _resetQuestion();

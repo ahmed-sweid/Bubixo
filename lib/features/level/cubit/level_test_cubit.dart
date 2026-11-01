@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/level_content.dart';
 import '../../../core/models/level_test_models.dart';
+import '../../../core/services/sound_service.dart';
 
 part 'level_test_state.dart';
 
@@ -24,6 +25,7 @@ class LevelTestCubit extends Cubit<LevelTestState> {
           index < current.answers.length ? current.answers[index] : null,
     );
     answers[current.questionIndex] = optionIndex;
+    SoundService.instance.play(SoundEvent.optionSelect);
     emit(
       LevelTestReady(
         questions: current.questions,
@@ -39,9 +41,11 @@ class LevelTestCubit extends Cubit<LevelTestState> {
       return;
     }
     if (current.questionIndex >= current.questions.length - 1) {
+      SoundService.instance.play(SoundEvent.sessionComplete);
       emit(LevelTestResult(levelIndex: _computeResult(current)));
       return;
     }
+    SoundService.instance.play(SoundEvent.transition);
     emit(
       LevelTestReady(
         questions: current.questions,

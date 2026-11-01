@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/design_system.dart';
 import '../../core/models/lesson_models.dart';
+import '../../core/services/sound_service.dart';
 import 'widgets/lesson_test_question_view.dart';
 import 'widgets/lesson_test_result_view.dart';
 
@@ -42,6 +43,7 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
       _questionIndex == widget.lesson.questions.length - 1;
 
   void _selectOption(int optionIndex) {
+    SoundService.instance.play(SoundEvent.optionSelect);
     setState(() => _answers[_questionIndex] = optionIndex);
   }
 
@@ -51,13 +53,16 @@ class _LessonTestScreenState extends State<LessonTestScreen> {
     }
     if (_isLastQuestion) {
       // TODO(backend): sonucu lesson_progress tablosuna kaydet.
+      SoundService.instance.play(SoundEvent.sessionComplete);
       setState(() => _finished = true);
       return;
     }
+    SoundService.instance.play(SoundEvent.transition);
     setState(() => _questionIndex++);
   }
 
   void _retry() {
+    SoundService.instance.play(SoundEvent.tap);
     setState(() {
       for (int i = 0; i < _answers.length; i++) {
         _answers[i] = null;

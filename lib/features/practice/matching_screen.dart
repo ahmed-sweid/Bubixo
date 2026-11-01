@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/practice_content.dart';
 import '../../core/design_system.dart';
 import '../../core/models/practice_models.dart';
+import '../../core/services/sound_service.dart';
 import 'practice_launcher.dart';
 import 'widgets/matching_tile.dart';
 import 'widgets/practice_session_frame.dart';
@@ -43,6 +44,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
     if (_complete || _matched.contains(pairId)) {
       return;
     }
+    SoundService.instance.play(SoundEvent.tap);
     setState(() {
       _selectedTerm = _selectedTerm == pairId ? null : pairId;
       _mismatch = false;
@@ -54,6 +56,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
     if (_complete || _matched.contains(pairId)) {
       return;
     }
+    SoundService.instance.play(SoundEvent.tap);
     setState(() {
       _selectedMeaning = _selectedMeaning == pairId ? null : pairId;
       _mismatch = false;
@@ -66,6 +69,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
       return;
     }
     if (_selectedTerm == _selectedMeaning) {
+      SoundService.instance.play(SoundEvent.correct);
       _matched.add(_selectedTerm!);
       _selectedTerm = null;
       _selectedMeaning = null;
@@ -76,6 +80,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
         }
       }
     } else {
+      SoundService.instance.play(SoundEvent.wrong);
       _mismatch = true;
       _mistakeThisRound = true;
       _selectedTerm = null;
@@ -85,6 +90,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
 
   void _advance() {
     if (_isLast) {
+      SoundService.instance.play(SoundEvent.sessionComplete);
       openPracticeResult(
         context,
         _type,
@@ -94,6 +100,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
       );
       return;
     }
+    SoundService.instance.play(SoundEvent.transition);
     setState(() {
       _index++;
       _matched.clear();
