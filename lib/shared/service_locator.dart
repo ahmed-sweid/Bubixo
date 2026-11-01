@@ -11,6 +11,9 @@ import '../features/auth/data/repositories/auth_repository.dart';
 import '../features/lessons/cubit/lessons_cubit.dart';
 import '../features/lessons/data/datasources/lesson_remote_data_source.dart';
 import '../features/lessons/data/repositories/lesson_repository.dart';
+import '../features/words/cubit/words_cubit.dart';
+import '../features/words/data/datasources/word_remote_data_source.dart';
+import '../features/words/data/repositories/word_repository.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -37,6 +40,7 @@ Future<void> initDependencies({SupabaseClient? supabase}) async {
 
   _initAuth();
   _initLessons();
+  _initWords();
 }
 
 /// Özellik başına ayrı kayıt bölümü: her veri katmanı kendi fonksiyonunda.
@@ -66,6 +70,18 @@ void _initLessons() {
   );
 
   sl.registerFactory<LessonsCubit>(() => LessonsCubit(repository: sl()));
+}
+
+void _initWords() {
+  sl.registerLazySingleton<WordRemoteDataSource>(
+    () => WordRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<WordRepository>(
+    () => WordRepositoryImpl(sl(), sl()),
+  );
+
+  sl.registerFactory<WordsCubit>(() => WordsCubit(repository: sl()));
 }
 
 /// Özellik bazlı kayıt yardımcısı: widget testleri `initDependencies()`
