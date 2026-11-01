@@ -396,20 +396,30 @@ abstract final class VocabularyWordProgressColumns {
   static const String userId = 'user_id';
   static const String wordId = 'word_id';
 
-  /// `en_to_tr | tr_to_en` — kart yönü, SRS planını ayrı tutar.
+  /// `en_to_translation | translation_to_en | cloze` — benzersiz anahtar
+  /// `(user_id, word_id, card_direction)`, yani kelime başına birden çok satır
+  /// olabilir ve her kart yönü kendi SRS planını taşır.
   static const String cardDirection = 'card_direction';
 
-  /// `new | learning | memorized`.
+  /// `new | learning | review | mastered | suspended`.
   static const String status = 'status';
   static const String dueAt = 'due_at';
   static const String lastReviewedAt = 'last_reviewed_at';
   static const String repetitions = 'repetitions';
   static const String lapses = 'lapses';
+
+  /// Leitner kutusu: 1 (yeni/zor) … 5 (iyi öğrenilmiş).
   static const String boxLevel = 'box_level';
+
+  /// Satırın planlayıcısı; yeni satırlar `leitner` default'u ile doğar.
+  static const String schedulerVersion = 'scheduler_version';
+
+  /// `jsonb` — planlayıcıya özel durum, şema sözlüğü alanı yorumlamaz.
+  static const String schedulerState = 'scheduler_state';
   static const String createdAt = 'created_at';
 
   static const String all =
-      '$id, $userId, $wordId, $cardDirection, $status, $dueAt, $lastReviewedAt, $repetitions, $lapses, $boxLevel';
+      '$id, $userId, $wordId, $cardDirection, $status, $dueAt, $lastReviewedAt, $repetitions, $lapses, $boxLevel, $schedulerVersion';
 }
 
 abstract final class ProfileColumns {
