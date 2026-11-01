@@ -23,7 +23,7 @@ abstract final class LoginContent {
   static const String ctaLabel = 'GİRİŞ YAP';
   static const String forgotLabel = 'ŞİFREMİ UNUTTUM';
   static const String googleCtaLabel = 'GOOGLE İLE GİRİŞ YAP';
-  static const String googleIconAsset = 'assets/gg/search.png';
+  static const String googleIconAsset = 'assets/icons/search.png';
   static const String dividerLabel = 'VEYA';
   static const String signupPromptLabel = 'HESABIN YOK MU?';
   static const String signupCtaLabel = 'KAYDOL';
