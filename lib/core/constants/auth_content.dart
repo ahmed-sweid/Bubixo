@@ -10,6 +10,11 @@ abstract final class AuthContent {
   static const String invalidEmail = 'Geçerli bir e-posta adresi gir.';
   static const String shortPassword = 'Şifren en az 6 karakter olmalı.';
   static const String passwordMismatch = 'Şifreler eşleşmiyor.';
+
+  /// OAuth tarayıcıyı açamadığında gösterilir; sunucu tarafı hatalar
+  /// `Failure.errorMessage` üzerinden gelir.
+  static const String googleLaunchFailed =
+      'Google ile giriş başlatılamadı. Farklı bir yöntem dene.';
 }
 
 abstract final class LoginContent {

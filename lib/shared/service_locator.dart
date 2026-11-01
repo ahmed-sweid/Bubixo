@@ -5,6 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/data/auth_session.dart';
 import '../core/data/supabase_backend.dart';
 import '../core/network/network_info.dart';
+import '../features/auth/cubit/auth_cubit.dart';
+import '../features/auth/data/datasources/auth_remote_data_source.dart';
+import '../features/auth/data/repositories/auth_repository.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -27,5 +30,24 @@ Future<void> initDependencies({SupabaseClient? supabase}) async {
   sl.registerLazySingleton<AuthSession>(
     () => AuthSession(sl()),
     dispose: (session) => session.dispose(),
+  );
+
+  _initAuth();
+}
+
+/// Özellik başına ayrı kayıt bölümü: her veri katmanı kendi fonksiyonunda.
+void _initAuth() {
+  sl.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(sl(), sl()),
+  );
+
+  // Cubit ömrü widget ile birlikte biter; oturumun kalıcı durumu
+  // `AuthSession` lazy singleton'ında durur.
+  sl.registerFactory<AuthCubit>(
+    () => AuthCubit(repository: sl(), session: sl()),
   );
 }
