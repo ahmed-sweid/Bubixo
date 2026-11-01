@@ -1,5 +1,6 @@
 import 'package:en_bubixo/features/auth/cubit/auth_cubit.dart';
 import 'package:en_bubixo/features/lessons/cubit/lessons_cubit.dart';
+import 'package:en_bubixo/features/words/cubit/words_cubit.dart';
 import 'package:en_bubixo/shared/service_locator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,6 +24,13 @@ void main() {
 
     test('dersler cubit repository ile kuruluyor', () {
       final LessonsCubit cubit = sl<LessonsCubit>();
+      addTearDown(cubit.close);
+
+      expect(cubit.repository, isNotNull);
+    });
+
+    test('kelimeler cubit repository ile kuruluyor', () {
+      final WordsCubit cubit = sl<WordsCubit>();
       addTearDown(cubit.close);
 
       expect(cubit.repository, isNotNull);
