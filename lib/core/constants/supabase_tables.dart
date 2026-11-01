@@ -71,6 +71,17 @@ abstract final class SupabaseRpc {
 
   /// Seviye/ders/gramer/hikâye testinin denemesini kaydeder, geçer/kalmaz kararını o verir.
   static const String submitContentTest = 'submit_content_test';
+
+  /// Seviye belirleme testini başlatır veya süren oturumu geri verir; soruyu
+  /// ve aşamayı sunucu seçer, anahtar taşımaz.
+  static const String placementStartAttempt = 'placement_start_attempt';
+
+  /// Cevabı `private.placement_question_keys` ile doğrular, kaydeder ve
+  /// adaptif sıradaki soruyu (ya da kapanış özetini) döner.
+  static const String placementSubmitAnswer = 'placement_submit_answer';
+
+  /// Oturumun seviye tahminini, güvenini ve beceri kanıtlarını okur.
+  static const String placementGetResult = 'placement_get_result';
 }
 
 abstract final class LevelColumns {
