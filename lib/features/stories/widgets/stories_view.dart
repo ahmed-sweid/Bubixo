@@ -10,6 +10,7 @@ import '../../../core/models/story_models.dart';
 import '../../common/states/app_empty_view.dart';
 import '../../common/widgets/category_filter_sheet.dart';
 import '../../common/widgets/level_chip.dart';
+import '../story_reading_screen.dart';
 import 'continue_story_card.dart';
 import 'story_card.dart';
 
@@ -83,6 +84,17 @@ class _StoriesViewState extends State<StoriesView> {
       _levelIndex = -1;
       _categories = <String>[];
     });
+  }
+
+  void _openStory(Story story, {int sentenceIndex = 0}) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => StoryReadingScreen(
+          story: story,
+          initialSentenceIndex: sentenceIndex,
+        ),
+      ),
+    );
   }
 
   @override
@@ -218,7 +230,13 @@ class _StoriesViewState extends State<StoriesView> {
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.lg,
                     ),
-                    child: ContinueStoryCard(story: continueStory),
+                    child: ContinueStoryCard(
+                      story: continueStory,
+                      onTap: () => _openStory(
+                        continueStory,
+                        sentenceIndex: continueStory.lastReadSentenceIndex,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -274,7 +292,10 @@ class _StoriesViewState extends State<StoriesView> {
                       int index,
                     ) {
                       final Story story = results[index];
-                      return StoryCard(story: story);
+                      return StoryCard(
+                        story: story,
+                        onTap: () => _openStory(story),
+                      );
                     }, childCount: results.length),
                   ),
                 ),
