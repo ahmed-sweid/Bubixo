@@ -82,6 +82,14 @@ abstract final class SupabaseRpc {
 
   /// Oturumun seviye tahminini, güvenini ve beceri kanıtlarını okur.
   static const String placementGetResult = 'placement_get_result';
+
+  /// Kullanıcının seviye imzasını yazar (`profiles.current_level_id`) ve
+  /// ilerleme defterini senkronlar. Elle seçim buradan geçer.
+  static const String setUserLevel = 'set_user_level';
+
+  /// Seviyeyi **istemciden almaz**; kullanıcının kendi `completed` oturumunun
+  /// `estimated_level` alanını katalog bandına çözüp imzaya yazar.
+  static const String applyPlacementResult = 'apply_placement_result';
 }
 
 abstract final class LevelColumns {
@@ -338,8 +346,10 @@ abstract final class UserLevelProgressColumns {
   static const String userId = 'user_id';
   static const String levelId = 'level_id';
 
-  /// `locked | unlocked | in_progress | completed`.
-  /// `completed` yalnızca `submit_content_test` RPC'si ile yazılır.
+  /// `locked | unlocked | completed` — canlı kısıt yalnız bunlara izin verir.
+  /// "Şu an hangi banddayım" bu tabloda değil `profiles.current_level_id`
+  /// imzasında durur; `completed` ise yalnız `submit_content_test` RPC'si
+  /// ile yazılabilir (istemci policy'si reddediyor).
   static const String status = 'status';
   static const String unlockedAt = 'unlocked_at';
   static const String completedAt = 'completed_at';
@@ -444,6 +454,16 @@ abstract final class ProfileColumns {
 
   /// Öğrenilen dil — bu proje için `en`.
   static const String learningLanguage = 'learning_language';
+
+  /// Kullanıcının şu anki seviyesi (`levels.id`). `null` = henüz seçmedi.
+  /// Yazımı yalnız `set_user_level` / `apply_placement_result` RPC'leri yapar.
+  static const String currentLevelId = 'current_level_id';
+
+  /// `manual | placement` — imzanın nasıl oluştuğu.
+  static const String currentLevelSource = 'current_level_source';
+
+  /// İmzanın son yazıldığı an.
+  static const String currentLevelAt = 'current_level_at';
   static const String createdAt = 'created_at';
   static const String updatedAt = 'updated_at';
 
