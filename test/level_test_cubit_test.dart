@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:dart_either/dart_either.dart';
 import 'package:en_bubixo/core/error/failure.dart';
 import 'package:en_bubixo/features/level/cubit/level_test_cubit.dart';
+import 'package:en_bubixo/features/level/data/models/level_models.dart';
 import 'package:en_bubixo/features/level/data/models/placement_models.dart';
+import 'package:en_bubixo/features/level/data/repositories/level_repository.dart';
 import 'package:en_bubixo/features/level/data/repositories/placement_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -138,6 +140,55 @@ PlacementSession _session(PlacementRoute route) => PlacementSession(
   attemptNumber: 1,
   route: route,
 );
+
+class _FakeLevelRepository implements LevelRepository {
+  _FakeLevelRepository();
+
+  AppLevel? savedResponse;
+  Failure? failure;
+
+  /// Doluysa yazma bekletilir: sürerken ikinci onay denenmez.
+  Completer<Either<Failure, AppLevel>>? hold;
+
+  String? appliedAttemptId;
+  int applyCalls = 0;
+
+  @override
+  Future<Either<Failure, AppLevel>> applyPlacementResult(String attemptId) async {
+    applyCalls++;
+    appliedAttemptId = attemptId;
+
+    final Failure? error = failure;
+    final Either<Failure, AppLevel> response =
+        error != null
+        ? Left<Failure, AppLevel>(error)
+        : Right<Failure, AppLevel>(
+            savedResponse ??
+                const AppLevel(id: '4', code: 'B2', title: 'Upper Intermediate', orderIndex: 4),
+          );
+
+    final Completer<Either<Failure, AppLevel>>? pending = hold;
+    if (pending != null) {
+      hold = null;
+      return pending.future.then<Either<Failure, AppLevel>>((_) => response);
+    }
+    return response;
+  }
+
+  @override
+  Future<Either<Failure, List<AppLevel>>> fetchLevels() async =>
+      Left<Failure, List<AppLevel>>(const NetworkFailure());
+
+  @override
+  Future<Either<Failure, AppLevel?>> fetchCurrentLevel() async =>
+      Left<Failure, AppLevel?>(const NetworkFailure());
+
+  @override
+  Future<Either<Failure, AppLevel>> saveLevel({
+    required String levelId,
+    required LevelSource source,
+  }) async => Left<Failure, AppLevel>(const NetworkFailure());
+}
 
 void main() {
   late _FakePlacementRepository repository;
@@ -314,6 +365,83 @@ void main() {
       await cubit.advance();
 
       expect(cubit.state, isA<LevelTestError>());
+    });
+  });
+
+  group('LevelTestCubit onay yazımı', () {
+    test('seviye deposu yoksa onay hiçbir yere yazmadan true döner', () async {
+      final LevelTestCubit bare = LevelTestCubit(
+        initialState: const LevelTestResult(levelIndex: 1, attemptId: '9'),
+      );
+      addTearDown(bare.close);
+
+      expect(await bare.confirmResult(), isTrue);
+    });
+
+    test('onay yalnız oturum id’sini apply_placement_result’a taşır', () async {
+      final _FakeLevelRepository levels = _FakeLevelRepository();
+      final LevelTestCubit controller = LevelTestCubit(
+        repository: repository,
+        levelRepository: levels,
+        initialState: const LevelTestResult(levelIndex: 3, attemptId: '15'),
+      );
+      addTearDown(controller.close);
+
+      expect(await controller.confirmResult(), isTrue);
+
+      expect(levels.appliedAttemptId, '15');
+      final LevelTestResult state = controller.state as LevelTestResult;
+      expect(state.isSaving, isFalse);
+      expect(state.saveMessage, isNull);
+    });
+
+    test('yazma reddedilirse false döner ve hata sonuçta kalır', () async {
+      final _FakeLevelRepository levels = _FakeLevelRepository()
+        ..failure = const PermissionFailure(code: '42501');
+      final LevelTestCubit controller = LevelTestCubit(
+        repository: repository,
+        levelRepository: levels,
+        initialState: const LevelTestResult(levelIndex: 3, attemptId: '15'),
+      );
+      addTearDown(controller.close);
+
+      expect(await controller.confirmResult(), isFalse);
+
+      final LevelTestResult state = controller.state as LevelTestResult;
+      expect(state, isA<LevelTestResult>());
+      expect(state.saveMessage, isNotEmpty);
+      expect(state.isSaving, isFalse);
+      expect(state.levelIndex, 3);
+    });
+
+    test('yazma sürerken ikinci onay gitmez', () async {
+      final _FakeLevelRepository levels = _FakeLevelRepository();
+      final Completer<Either<Failure, AppLevel>> gate =
+          Completer<Either<Failure, AppLevel>>();
+      levels.hold = gate;
+      final LevelTestCubit controller = LevelTestCubit(
+        repository: repository,
+        levelRepository: levels,
+        initialState: const LevelTestResult(levelIndex: 3, attemptId: '15'),
+      );
+      addTearDown(controller.close);
+
+      final Future<bool> first = controller.confirmResult();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        (controller.state as LevelTestResult).isSaving,
+        isTrue,
+      );
+      await controller.confirmResult();
+      expect(levels.applyCalls, 1);
+
+      gate.complete(
+        Right<Failure, AppLevel>(
+          const AppLevel(id: '4', code: 'B2', title: 'Upper Intermediate', orderIndex: 4),
+        ),
+      );
+      expect(await first, isTrue);
     });
   });
 }

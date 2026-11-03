@@ -746,13 +746,10 @@ void main() {
       final LevelTestCubit cubit = LevelTestCubit(repository: repository);
       await cubit.start();
 
-      int? completedLevel;
+      bool completed = false;
       await pumpScreen(
         tester,
-        LevelTestScreen(
-          cubit: cubit,
-          onCompleted: (int levelIndex) => completedLevel = levelIndex,
-        ),
+        LevelTestScreen(cubit: cubit, onCompleted: () => completed = true),
       );
 
       // Aşamanın üst sınırı çizilir: sunucu kaç soru geleceğini önceden bildirmez.
@@ -811,7 +808,7 @@ void main() {
       await tester.tap(find.text(LevelTestContent.confirmLabel));
       await tester.pump();
 
-      expect(completedLevel, LevelContent.cefrLevels.indexOf('B1'));
+      expect(completed, isTrue);
     });
   });
 }
