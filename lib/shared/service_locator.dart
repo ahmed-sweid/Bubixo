@@ -11,8 +11,11 @@ import '../features/auth/data/repositories/auth_repository.dart';
 import '../features/lessons/cubit/lessons_cubit.dart';
 import '../features/lessons/data/datasources/lesson_remote_data_source.dart';
 import '../features/lessons/data/repositories/lesson_repository.dart';
+import '../features/level/cubit/level_cubit.dart';
 import '../features/level/cubit/level_test_cubit.dart';
+import '../features/level/data/datasources/level_remote_data_source.dart';
 import '../features/level/data/datasources/placement_remote_data_source.dart';
+import '../features/level/data/repositories/level_repository.dart';
 import '../features/level/data/repositories/placement_repository.dart';
 import '../features/words/cubit/words_cubit.dart';
 import '../features/words/data/datasources/word_remote_data_source.dart';
@@ -44,6 +47,7 @@ Future<void> initDependencies({SupabaseClient? supabase}) async {
   _initAuth();
   _initLessons();
   _initWords();
+  _initLevelSelection();
   _initLevelTest();
 }
 
@@ -88,6 +92,19 @@ void _initWords() {
   sl.registerFactory<WordsCubit>(() => WordsCubit(repository: sl()));
 }
 
+void _initLevelSelection() {
+  sl.registerLazySingleton<LevelRemoteDataSource>(
+    () => LevelRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<LevelRepository>(
+    () => LevelRepositoryImpl(sl(), sl()),
+  );
+
+  // Her açılışta taze cubit: katalog ve imza ekranla birlikte okunur.
+  sl.registerFactory<LevelCubit>(() => LevelCubit(repository: sl()));
+}
+
 void _initLevelTest() {
   sl.registerLazySingleton<PlacementRemoteDataSource>(
     () => PlacementRemoteDataSourceImpl(sl()),
@@ -99,8 +116,11 @@ void _initLevelTest() {
 
   // Her açılışta taze cubit: testin ilerleme durumu ekranda yaşar, yarıda
   // bırakılan oturum sunucuda `in_progress` olarak bekler ve tekrar
-  // açıldığında aynı oturumdan devam eder.
-  sl.registerFactory<LevelTestCubit>(() => LevelTestCubit(repository: sl()));
+  // açıldığında aynı oturumdan devam eder. Sonucun imzaya çevrilmesi
+  // seviye kaydının deposundan geçer.
+  sl.registerFactory<LevelTestCubit>(
+    () => LevelTestCubit(repository: sl(), levelRepository: sl()),
+  );
 }
 
 /// Özellik bazlı kayıt yardımcısı: widget testleri `initDependencies()`

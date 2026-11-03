@@ -27,8 +27,8 @@ class LevelTestScreen extends StatelessWidget {
   final LevelTestCubit? cubit;
   final VoidCallback? onRetry;
 
-  /// Test bitince önerilen CEFR indeksiyle çağrılır.
-  final ValueChanged<int>? onCompleted;
+  /// Sonuç sunucuya yazıldıktan sonra çağrılır; yazma başarısızsa çağrılmaz.
+  final VoidCallback? onCompleted;
   final VoidCallback? onChooseManually;
 
   @override
@@ -64,11 +64,22 @@ class LevelTestScreen extends StatelessWidget {
                   onSelectOption: controller.selectOption,
                   onContinue: controller.advance,
                 ),
-              LevelTestResult(:final levelIndex) => LevelTestResultView(
-                levelIndex: levelIndex,
-                onConfirm: () => onCompleted?.call(levelIndex),
-                onChooseManually: onChooseManually,
-              ),
+              LevelTestResult(
+                :final levelIndex,
+                :final isSaving,
+                :final saveMessage,
+              ) =>
+                LevelTestResultView(
+                  levelIndex: levelIndex,
+                  isSaving: isSaving,
+                  message: saveMessage,
+                  onConfirm: () async {
+                    if (await controller.confirmResult()) {
+                      onCompleted?.call();
+                    }
+                  },
+                  onChooseManually: onChooseManually,
+                ),
             },
           );
         },

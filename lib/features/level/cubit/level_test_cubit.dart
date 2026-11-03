@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/level_content.dart';
 import '../../../core/constants/level_test_content.dart';
 import '../../../core/services/sound_service.dart';
+import '../data/models/level_models.dart';
 import '../data/models/placement_models.dart';
+import '../data/repositories/level_repository.dart';
 import '../data/repositories/placement_repository.dart';
 
 part 'level_test_state.dart';
@@ -23,10 +25,17 @@ part 'level_test_state.dart';
 class LevelTestCubit extends Cubit<LevelTestState> {
   LevelTestCubit({
     this.repository,
+    this.levelRepository,
     LevelTestState initialState = const LevelTestLoading(),
   }) : super(initialState);
 
   final PlacementRepository? repository;
+
+  /// Sonucu kullanıcının seviye imzasına çeviren depo
+  /// (`apply_placement_result`). Kayıtlı değilse [confirmResult] hiçbir yere
+  /// yazmadan başarılı döner — test ekranını veri katmanı olmadan açan
+  /// widget testleri bu yüzden akışı tamamlayabilir.
+  final LevelRepository? levelRepository;
 
   /// Sorunun ekranda görünmesinden cevabın gönderilmesine geçen süre;
   /// `p_response_time_ms` olarak sunucuya yazılır.
@@ -102,7 +111,11 @@ class LevelTestCubit extends Cubit<LevelTestState> {
     if (route.finished || question == null) {
       SoundService.instance.play(SoundEvent.sessionComplete);
       emit(
-        LevelTestResult(levelIndex: _levelIndex(route.outcome), outcome: route.outcome),
+        LevelTestResult(
+          levelIndex: _levelIndex(route.outcome),
+          attemptId: attemptId,
+          outcome: route.outcome,
+        ),
       );
       return;
     }
@@ -119,6 +132,47 @@ class LevelTestCubit extends Cubit<LevelTestState> {
       ),
     );
   }
+
+  /// Testin verdiği bandı kullanıcının seviye imzası olarak sunucuya yazar.
+  ///
+  /// İstemci yalnız oturum id'si gönderir: bandı sunucu kendi kaydından
+  /// çözer, böylece "test bana C2 verdi" iddiası geçerli bir yazma olmaz.
+  /// Dönen değer ekranın çıkıp çıkmayacağını söy — `false` durumda sonuç
+  /// ekranında kalınır ve [LevelTestResult.saveMessage] hatayı gösterir.
+  Future<bool> confirmResult() async {
+    final LevelTestState current = state;
+    if (current is! LevelTestResult || current.isSaving) return false;
+
+    final LevelRepository? source = levelRepository;
+    if (source == null) return true;
+
+    emit(_resultOf(current, isSaving: true));
+    final result = await source.applyPlacementResult(current.attemptId);
+    if (isClosed) return false;
+
+    return result.fold(
+      ifLeft: (failure) {
+        emit(_resultOf(current, saveMessage: failure.errorMessage));
+        return false;
+      },
+      ifRight: (AppLevel applied) {
+        emit(_resultOf(current));
+        return true;
+      },
+    );
+  }
+
+  LevelTestResult _resultOf(
+    LevelTestResult base, {
+    bool isSaving = false,
+    String? saveMessage,
+  }) => LevelTestResult(
+    levelIndex: base.levelIndex,
+    attemptId: base.attemptId,
+    outcome: base.outcome,
+    isSaving: isSaving,
+    saveMessage: saveMessage,
+  );
 
   /// Doğru/yanlış sesi; yazma-konuşma sorularında sunucu `null` döner ve
   /// geri bildirim çalınmaz.

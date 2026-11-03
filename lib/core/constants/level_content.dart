@@ -21,4 +21,12 @@ abstract final class LevelContent {
     'İleri',
     'Ustalık',
   ];
+
+  /// Karta yazılacak Türkçe açıklama. Sunucu `levels.title`'ı İngilizce
+  /// döndürdüğü için arayüz metni burada kalır ve **koda göre** çözülür;
+  /// tanınmayan kod boş döner, çağıran sunucunun adını gösterir.
+  static String descriptionFor(String code) {
+    final int index = cefrLevels.indexOf(code);
+    return index < 0 ? '' : cefrLevelDescriptions[index];
+  }
 }

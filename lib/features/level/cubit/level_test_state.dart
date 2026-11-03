@@ -72,15 +72,37 @@ final class LevelTestReady extends LevelTestState {
 }
 
 final class LevelTestResult extends LevelTestState {
-  const LevelTestResult({required this.levelIndex, this.outcome});
+  const LevelTestResult({
+    required this.levelIndex,
+    required this.attemptId,
+    this.outcome,
+    this.isSaving = false,
+    this.saveMessage,
+  });
 
   /// [LevelContent.cefrLevels] indeksine çevrilmiş sunucu tahmini.
   final int levelIndex;
+
+  /// Sonucu imzaya çevirecek oturum. Seviye istemciden gitmez:
+  /// `apply_placement_result` bandı bu kaydın kendisinden çözer.
+  final String attemptId;
 
   /// Sunucunun tam özeti (güven, soru/doğru sayısı, puan) — UI şu an yalnızca
   /// `levelIndex` kullanıyor, ileride sonuç ekranına eklenebilir.
   final PlacementOutcome? outcome;
 
+  /// Onay sunucudayken buton yeniden basılamaz.
+  final bool isSaving;
+
+  /// Yazma reddedildiyse gösterilebilir metin; onay tekrar denenebilir kalır.
+  final String? saveMessage;
+
   @override
-  List<Object?> get props => <Object?>[levelIndex, outcome];
+  List<Object?> get props => <Object?>[
+    levelIndex,
+    attemptId,
+    outcome,
+    isSaving,
+    saveMessage,
+  ];
 }
