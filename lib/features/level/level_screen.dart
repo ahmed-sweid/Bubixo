@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/constants/level_content.dart';
+import '../../core/data/launch_store.dart';
 import '../../core/design_system.dart';
 import 'level_test_screen.dart';
 import 'widgets/level_select_card.dart';
@@ -47,10 +48,15 @@ class _LevelScreenState extends State<LevelScreen>
     setState(() => _selectedLevel = index);
   }
 
-  void _confirmSelection() {
+  Future<void> _confirmSelection() async {
     // TODO(backend): seçilen seviyeyi kullanıcı profiline kaydet.
-    Navigator.of(context).pushReplacement(
+    // İlk akış burada biter: bayrak yazılır ve tanıtım yığını (splash,
+    // onboarding, giriş) arka tuşuna basınca geri gelmeyecek şekilde silinir.
+    await LaunchStore.current.markIntroCompleted();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute<void>(builder: (_) => const HomeShell()),
+      (Route<dynamic> route) => false,
     );
   }
 
