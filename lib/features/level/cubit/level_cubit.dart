@@ -24,6 +24,14 @@ class LevelCubit extends Cubit<LevelState> {
 
   final LevelRepository? repository;
 
+  /// Ekranda işaretli bant; seçim ekranından onay sayfasına taşınır.
+  AppLevel? get selectedLevel =>
+      state is LevelReady ? (state as LevelReady).selectedLevel : null;
+
+  /// Sunucuda kayıtlı bant; test sonrası onay sayfasında gösterilir.
+  AppLevel? get currentLevel =>
+      state is LevelReady ? (state as LevelReady).currentLevel : null;
+
   /// Katalog okunana kadar ekranda duran altı bant. `id` değerleri yereldir:
   /// veri katmanı olmadan [saveSelected] hiç yazmadığı için sunucuya
   /// ulaşamazlar.

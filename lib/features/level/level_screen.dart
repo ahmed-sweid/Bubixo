@@ -11,6 +11,7 @@ import '../common/states/app_error_view.dart';
 import 'cubit/level_cubit.dart';
 import 'data/models/level_models.dart';
 import 'data/repositories/level_repository.dart';
+import 'level_chosen_screen.dart';
 import 'level_test_screen.dart';
 import 'widgets/level_select_card.dart';
 
@@ -49,26 +50,39 @@ class _LevelScreenState extends State<LevelScreen>
     super.dispose();
   }
 
-  /// İlk akış yalnız yazma onaylandıktan sonra biter: bayrak yazılır ve
-  /// tanıtım yığını (splash, onboarding, giriş) geri gelmeyecek şekilde
-  /// silinir. Yazma reddedilirse ekranda kalınır ve hata butonun altında
-  /// gösterilir — seviyesiz girmek sonradan düzeltilmesi gereken boşluk
-  /// bırakır.
-  Future<void> _confirm(BuildContext context, LevelCubit controller) async {
-    final bool saved = await controller.saveSelected();
-    if (!saved || !context.mounted) return;
-
-    await LaunchStore.current.markIntroCompleted();
-    if (!context.mounted) return;
+  /// Seviye sunucuya yazıldıktan sonraki tek çıkış: onay sayfasındaki
+  /// buton tanıtım yığını (splash, onboarding, giriş, seçim) silinerek ana
+  /// ekrana götürür.
+  void _goHome(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute<void>(builder: (_) => const HomeShell()),
       (Route<dynamic> route) => false,
     );
   }
 
+  /// İlk akış yalnız yazma onaylandıktan sonra ilerler: bayrak yazılır,
+  /// onay sayfası gösterilir. Yazma reddedilirse ekranda kalınır ve hata
+  /// butonun altında gösterilir — seviyesiz girmek sonradan düzeltilmesi
+  /// gereken boşluk bırakır.
+  Future<void> _confirm(BuildContext context, LevelCubit controller) async {
+    final bool saved = await controller.saveSelected();
+    if (!saved || !context.mounted) return;
+
+    await LaunchStore.current.markIntroCompleted();
+    if (!context.mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => LevelChosenScreen(
+          level: controller.selectedLevel,
+          onContinue: () => _goHome(context),
+        ),
+      ),
+    );
+  }
+
   /// Testin verdiği bant onaylanınca sunucuda imzaya dönüşür; katalog o
-  /// zaman yeniden okunur ve imza ilgili kartı önseçer. Böylece ekrandaki
-  /// seçim her zaman sunucunun dediği banttır.
+  /// zaman yeniden okunur ve onay sayfası kayıtlı bandı gösterir. Böylece
+  /// test akışı seçim ekranına geri dönmek zorunda kalmaz.
   Future<void> _openLevelTest(
     BuildContext context,
     LevelCubit controller,
@@ -76,7 +90,19 @@ class _LevelScreenState extends State<LevelScreen>
     final bool? saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
         builder: (BuildContext _) => LevelTestScreen(
-          onCompleted: () => Navigator.of(context).pop(true),
+          onCompleted: () async {
+            await LaunchStore.current.markIntroCompleted();
+            await controller.load();
+            if (!context.mounted) return;
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute<void>(
+                builder: (_) => LevelChosenScreen(
+                  level: controller.currentLevel,
+                  onContinue: () => _goHome(context),
+                ),
+              ),
+            );
+          },
           onChooseManually: () => Navigator.of(context).pop(false),
         ),
       ),

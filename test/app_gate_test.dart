@@ -8,6 +8,7 @@ import 'package:en_bubixo/core/design_system.dart';
 import 'package:en_bubixo/features/auth/data/auth_session.dart';
 import 'package:en_bubixo/features/auth/login_screen.dart';
 import 'package:en_bubixo/features/gate/app_gate.dart';
+import 'package:en_bubixo/features/level/level_chosen_screen.dart';
 import 'package:en_bubixo/features/level/level_screen.dart';
 import 'package:en_bubixo/features/level/widgets/level_select_card.dart';
 import 'package:en_bubixo/features/shell/home_shell.dart';
@@ -146,7 +147,20 @@ void main() {
     await tester.pump();
 
     expect(store.introCompleted, isTrue);
+    expect(find.byType(LevelChosenScreen), findsOneWidget);
+    expect(find.byType(HomeShell), findsNothing);
+
+    // Onay sayfasındaki buton tanıtım yığınını silip ana ekrana götürür.
+    await tester.tap(find.text(LevelContent.chosenCtaLabel));
+    // pumpAndSettle kullanılmaz: ana ekranın iskeletleri sonsuz shimmer
+    // çalıştırıyor, settle hiç gelmez.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+    await tester.pump();
+
     expect(find.byType(HomeShell), findsOneWidget);
+    expect(find.byType(LevelChosenScreen), findsNothing);
     expect(find.byType(LevelScreen), findsNothing);
 
     // Geri: yığın silindiği için kök rota kaldı, uygulama ana ekranda kalır.

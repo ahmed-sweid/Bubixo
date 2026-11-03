@@ -44,6 +44,16 @@ final class LevelReady extends LevelState {
     return null;
   }
 
+  /// Sunucuda kayıtlı bant; onay sayfasında gösterilmek üzere kullanılır.
+  AppLevel? get currentLevel {
+    for (final AppLevel level in levels) {
+      if (level.id == currentLevelId) {
+        return level;
+      }
+    }
+    return null;
+  }
+
   @override
   List<Object?> get props => <Object?>[
     levels,

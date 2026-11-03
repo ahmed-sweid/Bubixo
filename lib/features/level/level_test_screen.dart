@@ -7,6 +7,7 @@ import '../../shared/service_locator.dart';
 import '../common/states/app_error_view.dart';
 import '../common/states/app_skeletons.dart';
 import 'cubit/level_test_cubit.dart';
+import 'data/repositories/level_repository.dart';
 import 'data/repositories/placement_repository.dart';
 import 'widgets/level_test_empty_view.dart';
 import 'widgets/level_test_question_view.dart';
@@ -90,9 +91,15 @@ class LevelTestScreen extends StatelessWidget {
   /// Veri katmanı kayıtlıysa (üretim) gerçek cubit, değilse boşta kalan
   /// iskelet — widget testleri ekranı tek başına render eder.
   LevelTestCubit _cubitFromLocator() {
-    final PlacementRepository? repository = slIfRegistered<PlacementRepository>();
+    final PlacementRepository? repository =
+        slIfRegistered<PlacementRepository>();
+    final LevelRepository? levelRepository = slIfRegistered<LevelRepository>();
     return repository == null
-        ? LevelTestCubit()
-        : LevelTestCubit(repository: repository)..start();
+          ? LevelTestCubit()
+          : LevelTestCubit(
+              repository: repository,
+              levelRepository: levelRepository,
+            )
+      ..start();
   }
 }

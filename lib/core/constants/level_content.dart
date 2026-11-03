@@ -29,4 +29,17 @@ abstract final class LevelContent {
     final int index = cefrLevels.indexOf(code);
     return index < 0 ? '' : cefrLevelDescriptions[index];
   }
+
+  /// Seviye kaydedildikten sonraki onay sayfası. {level} yer tutucusu
+  /// seçilen CEFR koduyla değiştirilir; seviye bilinmiyorsa
+  /// [chosenFallbackMessage] kullanılır.
+  static const String chosenImageAsset = 'assets/images/Goal-rafiki.png';
+  static const String chosenTitle = 'Seviyen hazır!';
+  static const String chosenMessageTemplate =
+      'Artık {level} bandındasın. Dersler, kelimeler ve hikâyeler bu '
+      'seviyeye göre sana eşlik edecek.';
+  static const String chosenFallbackMessage =
+      'Seviyen kaydedildi. Dersler, kelimeler ve hikâyeler bu seviyeye '
+      'göre sana eşlik edecek.';
+  static const String chosenCtaLabel = 'ANA SAYFAYA GİT';
 }
