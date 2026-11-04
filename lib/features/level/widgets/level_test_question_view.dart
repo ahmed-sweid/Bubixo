@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/level_test_content.dart';
 import '../../../core/design_system.dart';
 import '../../common/widgets/option_card.dart';
-import '../../../core/models/level_test_models.dart';
+import '../data/models/placement_models.dart';
 
 /// Tek soruluk test görünümü: ilerleme, soru, seçenekler ve DEVAM butonu.
+///
+/// Soru listesi değil tek soru alınır: sıradaki soruyu sunucu seçer, bu
+/// görünüm yalnızca gösterilir.
 class LevelTestQuestionView extends StatelessWidget {
   const LevelTestQuestionView({
     super.key,
@@ -15,14 +18,19 @@ class LevelTestQuestionView extends StatelessWidget {
     required this.selectedOption,
     required this.onSelectOption,
     required this.onContinue,
+    this.isSubmitting = false,
   });
 
-  final LevelTestQuestion question;
+  final PlacementQuestion question;
   final int index;
   final int total;
   final int? selectedOption;
   final ValueChanged<int> onSelectOption;
   final VoidCallback onContinue;
+
+  /// Cevap sunucudayken hem seçim hem DEVAM kilitlenir: aynı sorunun ikinci
+  /// gönderimi sunucuda 23505 ile reddedilir.
+  final bool isSubmitting;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +94,7 @@ class LevelTestQuestionView extends StatelessWidget {
                                     : 0,
                               ),
                               child: OptionCard(
-                                label: question.options[i],
+                                label: question.options[i].text,
                                 selected: selectedOption == i,
                                 onTap: () => onSelectOption(i),
                               ),
@@ -114,7 +122,10 @@ class LevelTestQuestionView extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: selectedOption == null ? null : onContinue,
+                  onPressed:
+                      selectedOption == null || isSubmitting
+                          ? null
+                          : onContinue,
                   child: const Text(LevelTestContent.ctaLabel),
                 ),
               ),

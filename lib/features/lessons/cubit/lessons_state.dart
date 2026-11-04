@@ -12,7 +12,13 @@ final class LessonsLoading extends LessonsState {
 }
 
 final class LessonsError extends LessonsState {
-  const LessonsError();
+  const LessonsError({this.message});
+
+  /// `Failure.errorMessage` — gösterilebilir Türkçe metin.
+  final String? message;
+
+  @override
+  List<Object?> get props => <Object?>[message];
 }
 
 final class LessonsEmpty extends LessonsState {

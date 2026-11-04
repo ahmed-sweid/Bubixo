@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:en_bubixo/features/level/level_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -5,7 +7,9 @@ import 'package:iconsax/iconsax.dart';
 import '../../core/constants/auth_content.dart';
 import '../../core/design_system.dart';
 import '../../core/services/sound_service.dart';
+import '../../shared/service_locator.dart';
 import 'auth_validators.dart';
+import 'cubit/auth_cubit.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 import 'widgets/or_divider.dart';
@@ -14,7 +18,11 @@ import 'widgets/or_divider.dart';
 /// odakta macaw), yeşil BÜYÜK HARF CTA, VEYA ayırıcı, marka Google butonu
 /// ve altta kayda yönlendiren satır.
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.cubit});
+
+  /// Test ve özel durumlar için enjekte edilebilir cubit; normal akışta
+  /// `null` bırakılır ve ekran `sl()`'den kendi örneğini alır.
+  final AuthCubit? cubit;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -25,12 +33,59 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _submitting = false;
+  String? _serverError;
+  bool _navigated = false;
+
+  /// Ekran kendi cubit'ini ilk kimlik komutunda `sl()`'den alır: yalnızca
+  /// render edilen ekran (widget testleri) DI gerektirmez.
+  AuthCubit? _ownedCubit;
+  StreamSubscription<AuthState>? _authSubscription;
+
+  AuthCubit get _cubit {
+    final cubit = _ownedCubit ??= widget.cubit ?? sl<AuthCubit>();
+    // Tek yönlendirme yolu dinleyici: OAuth'ta oturum komut dönmeden *sonra*
+    // gelir, komuttan sonra okumak yetmez.
+    _authSubscription ??= cubit.stream.listen(_onAuthState);
+    return cubit;
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    unawaited(_authSubscription?.cancel());
+    _ownedCubit?.close();
     super.dispose();
+  }
+
+  void _onAuthState(AuthState state) {
+    if (!mounted) return;
+
+    switch (state) {
+      case AuthSignedIn():
+        if (_navigated) return;
+        _navigated = true;
+        setState(() => _submitting = false);
+        _goToLevel();
+      case AuthError(:final message):
+        setState(() {
+          _submitting = false;
+          _serverError = message;
+        });
+        SoundService.instance.play(SoundEvent.wrong);
+      case AuthBusy():
+        setState(() => _submitting = true);
+      case AuthSignedOut():
+        // Oturum kendiliğinden düştü ya da OAuth tarayıcıda yarım kaldı.
+        setState(() {
+          _navigated = false;
+          _submitting = false;
+        });
+      case AuthChecking():
+      case AuthResetLinkSent():
+        break;
+    }
   }
 
   void _goToLevel() {
@@ -40,13 +95,26 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final bool isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) {
       SoundService.instance.play(SoundEvent.wrong);
       return;
     }
-    _goToLevel();
+    if (_submitting) return;
+
+    setState(() => _serverError = null);
+    await _cubit.signIn(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+  }
+
+  Future<void> _signInWithGoogle() async {
+    if (_submitting) return;
+    SoundService.instance.play(SoundEvent.tap);
+    setState(() => _serverError = null);
+    await _cubit.signInWithGoogle();
   }
 
   void _openSignup() {
@@ -150,9 +218,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     ElevatedButton(
-                      onPressed: _submit,
-                      child: Text(LoginContent.ctaLabel),
+                      onPressed: _submitting ? null : _submit,
+                      child: _submitting
+                          ? const _BusyChip()
+                          : Text(LoginContent.ctaLabel),
                     ),
+                    if (_serverError != null) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _serverError!,
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.accentCardinal,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                     TextButton(
                       onPressed: _openForgotPassword,
                       child: Text(LoginContent.forgotLabel),
@@ -162,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: AppSpacing.base),
                     ElevatedButton(
                       style: AppTheme.googleButton,
-                      onPressed: _goToLevel,
+                      onPressed: _submitting ? null : _signInWithGoogle,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Row(
@@ -202,6 +282,22 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// CTA dolgu rengini bozmayan 18px bekleme göstergesi.
+class _BusyChip extends StatelessWidget {
+  const _BusyChip();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox.square(
+      dimension: 18,
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        color: AppColors.canvas,
       ),
     );
   }

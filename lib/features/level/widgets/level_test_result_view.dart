@@ -9,11 +9,19 @@ class LevelTestResultView extends StatelessWidget {
   const LevelTestResultView({
     super.key,
     required this.levelIndex,
+    this.isSaving = false,
+    this.message,
     this.onConfirm,
     this.onChooseManually,
   });
 
   final int levelIndex;
+
+  /// Onay sunucudayken buton kilitlenir; aynı yazma iki kez gitmez.
+  final bool isSaving;
+
+  /// Yazma reddedildiyse butonun altındaki hata metni.
+  final String? message;
   final VoidCallback? onConfirm;
   final VoidCallback? onChooseManually;
 
@@ -67,9 +75,19 @@ class LevelTestResultView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xxl),
               ElevatedButton(
-                onPressed: onConfirm,
+                onPressed: isSaving ? null : onConfirm,
                 child: const Text(LevelTestContent.confirmLabel),
               ),
+              if (message != null) ...<Widget>[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  message!,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.accentCardinal,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
               const SizedBox(height: AppSpacing.md),
               SizedBox(
                 width: double.infinity,

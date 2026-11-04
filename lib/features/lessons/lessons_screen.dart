@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/design_system.dart';
+import '../../shared/service_locator.dart';
 import '../common/states/app_error_view.dart';
 import '../common/states/app_skeletons.dart';
 import 'cubit/lessons_cubit.dart';
+import 'data/repositories/lesson_repository.dart';
 import 'widgets/lessons_empty_view.dart';
 import 'widgets/lessons_view.dart';
 
 /// Dersler sekmesi: cubit durumuna göre yükleme, hata, boş veya hazır
-/// görünümü seçer.
+/// görünümü seçer. Kendi cubit'i verilmezse DI'dan alır ve kataloğu yükler.
 class LessonsScreen extends StatelessWidget {
   const LessonsScreen({super.key, this.cubit, this.onRetry});
 
@@ -19,14 +21,17 @@ class LessonsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<LessonsCubit>(
-      create: (_) => cubit ?? LessonsCubit(),
+      create: (_) => cubit ?? _cubitFromLocator(),
       child: BlocBuilder<LessonsCubit, LessonsState>(
         builder: (BuildContext context, LessonsState state) {
           return Scaffold(
             backgroundColor: AppColors.canvas,
             body: switch (state) {
               LessonsLoading() => const LessonsSkeleton(),
-              LessonsError() => AppErrorView(onRetry: onRetry),
+              LessonsError(:final message) => AppErrorView(
+                message: message,
+                onRetry: onRetry ?? () => context.read<LessonsCubit>().load(),
+              ),
               LessonsEmpty() => const LessonsEmptyView(),
               LessonsReady(:final levels) => LessonsView(levels: levels),
             },
@@ -34,5 +39,14 @@ class LessonsScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  /// Veri katmanı kayıtlıysa (üretim) gerçek cubit, değilse boşta kalan
+  /// iskelet — widget testleri ekranı tek başına render eder.
+  LessonsCubit _cubitFromLocator() {
+    final LessonRepository? repository = slIfRegistered<LessonRepository>();
+    return repository == null
+        ? LessonsCubit()
+        : LessonsCubit(repository: repository)..load();
   }
 }
